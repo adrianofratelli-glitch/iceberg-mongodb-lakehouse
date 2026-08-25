@@ -2010,260 +2010,260 @@
     {
       "label": "01-arquitetura.md",
       "file_type": "document",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "docs_prompts_01_arquitetura",
+      "id": "docs_briefing_01_arquitetura",
       "community": 1,
       "norm_label": "01-arquitetura.md"
     },
     {
       "label": "01 \u2014 Arquitetura",
       "file_type": "document",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "docs_prompts_01_arquitetura_01_arquitetura",
+      "id": "docs_briefing_01_arquitetura_01_arquitetura",
       "community": 1,
       "norm_label": "01 \u2014 arquitetura"
     },
     {
       "label": "O circuito",
       "file_type": "document",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L3",
       "_origin": "ast",
-      "id": "docs_prompts_01_arquitetura_o_circuito",
+      "id": "docs_briefing_01_arquitetura_o_circuito",
       "community": 1,
       "norm_label": "o circuito"
     },
     {
       "label": "Invariantes",
       "file_type": "document",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L27",
       "_origin": "ast",
-      "id": "docs_prompts_01_arquitetura_invariantes",
+      "id": "docs_briefing_01_arquitetura_invariantes",
       "community": 1,
       "norm_label": "invariantes"
     },
     {
       "label": "Ordem de montagem",
       "file_type": "document",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L39",
       "_origin": "ast",
-      "id": "docs_prompts_01_arquitetura_ordem_de_montagem",
+      "id": "docs_briefing_01_arquitetura_ordem_de_montagem",
       "community": 1,
       "norm_label": "ordem de montagem"
     },
     {
       "label": "Como rodar",
       "file_type": "document",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L52",
       "_origin": "ast",
-      "id": "docs_prompts_01_arquitetura_como_rodar",
+      "id": "docs_briefing_01_arquitetura_como_rodar",
       "community": 1,
       "norm_label": "como rodar"
     },
     {
       "label": "Scripts",
       "file_type": "document",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L69",
       "_origin": "ast",
-      "id": "docs_prompts_01_arquitetura_scripts",
+      "id": "docs_briefing_01_arquitetura_scripts",
       "community": 1,
       "norm_label": "scripts"
     },
     {
       "label": "Decis\u00f5es",
       "file_type": "document",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L88",
       "_origin": "ast",
-      "id": "docs_prompts_01_arquitetura_decis\u00f5es",
+      "id": "docs_briefing_01_arquitetura_decis\u00f5es",
       "community": 1,
       "norm_label": "decisoes"
     },
     {
       "label": "02-mongodb.md",
       "file_type": "document",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "docs_prompts_02_mongodb",
+      "id": "docs_briefing_02_mongodb",
       "community": 1,
       "norm_label": "02-mongodb.md"
     },
     {
       "label": "02 \u2014 MongoDB",
       "file_type": "document",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "docs_prompts_02_mongodb_02_mongodb",
+      "id": "docs_briefing_02_mongodb_02_mongodb",
       "community": 1,
       "norm_label": "02 \u2014 mongodb"
     },
     {
       "label": "Cole\u00e7\u00f5es",
       "file_type": "document",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L3",
       "_origin": "ast",
-      "id": "docs_prompts_02_mongodb_cole\u00e7\u00f5es",
+      "id": "docs_briefing_02_mongodb_cole\u00e7\u00f5es",
       "community": 1,
       "norm_label": "colecoes"
     },
     {
       "label": "Pr\u00e9-requisito n\u00e3o \u00f3bvio",
       "file_type": "document",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L38",
       "_origin": "ast",
-      "id": "docs_prompts_02_mongodb_pr\u00e9_requisito_n\u00e3o_\u00f3bvio",
+      "id": "docs_briefing_02_mongodb_pr\u00e9_requisito_n\u00e3o_\u00f3bvio",
       "community": 1,
       "norm_label": "pre-requisito nao obvio"
     },
     {
       "label": "O pipeline",
       "file_type": "document",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L52",
       "_origin": "ast",
-      "id": "docs_prompts_02_mongodb_o_pipeline",
+      "id": "docs_briefing_02_mongodb_o_pipeline",
       "community": 1,
       "norm_label": "o pipeline"
     },
     {
       "label": "DLQ",
       "file_type": "document",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L75",
       "_origin": "ast",
-      "id": "docs_prompts_02_mongodb_dlq",
+      "id": "docs_briefing_02_mongodb_dlq",
       "community": 1,
       "norm_label": "dlq"
     },
     {
       "label": "Tipos: o que passa e o que n\u00e3o passa",
       "file_type": "document",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L89",
       "_origin": "ast",
-      "id": "docs_prompts_02_mongodb_tipos_o_que_passa_e_o_que_n\u00e3o_passa",
+      "id": "docs_briefing_02_mongodb_tipos_o_que_passa_e_o_que_n\u00e3o_passa",
       "community": 1,
       "norm_label": "tipos: o que passa e o que nao passa"
     },
     {
       "label": "Verifica\u00e7\u00e3o de consist\u00eancia",
       "file_type": "document",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L106",
       "_origin": "ast",
-      "id": "docs_prompts_02_mongodb_verifica\u00e7\u00e3o_de_consist\u00eancia",
+      "id": "docs_briefing_02_mongodb_verifica\u00e7\u00e3o_de_consist\u00eancia",
       "community": 1,
       "norm_label": "verificacao de consistencia"
     },
     {
       "label": "03-interface-fluxos.md",
       "file_type": "document",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "docs_prompts_03_interface_fluxos",
+      "id": "docs_briefing_03_interface_fluxos",
       "community": 1,
       "norm_label": "03-interface-fluxos.md"
     },
     {
       "label": "03 \u2014 Interface e fluxos",
       "file_type": "document",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "docs_prompts_03_interface_fluxos_03_interface_e_fluxos",
+      "id": "docs_briefing_03_interface_fluxos_03_interface_e_fluxos",
       "community": 26,
       "norm_label": "03 \u2014 interface e fluxos"
     },
     {
       "label": "Estado atual \u2014 modo palco",
       "file_type": "document",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L8",
       "_origin": "ast",
-      "id": "docs_prompts_03_interface_fluxos_estado_atual_modo_palco",
+      "id": "docs_briefing_03_interface_fluxos_estado_atual_modo_palco",
       "community": 26,
       "norm_label": "estado atual \u2014 modo palco"
     },
     {
       "label": "As quatro capacidades da interface",
       "file_type": "document",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L19",
       "_origin": "ast",
-      "id": "docs_prompts_03_interface_fluxos_as_quatro_capacidades_da_interface",
+      "id": "docs_briefing_03_interface_fluxos_as_quatro_capacidades_da_interface",
       "community": 26,
       "norm_label": "as quatro capacidades da interface"
     },
     {
       "label": "Antes de apresentar",
       "file_type": "document",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L31",
       "_origin": "ast",
-      "id": "docs_prompts_03_interface_fluxos_antes_de_apresentar",
+      "id": "docs_briefing_03_interface_fluxos_antes_de_apresentar",
       "community": 26,
       "norm_label": "antes de apresentar"
     },
     {
       "label": "Roteiro (~8 min)",
       "file_type": "document",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L53",
       "_origin": "ast",
-      "id": "docs_prompts_03_interface_fluxos_roteiro_8_min",
+      "id": "docs_briefing_03_interface_fluxos_roteiro_8_min",
       "community": 26,
       "norm_label": "roteiro (~8 min)"
     },
     {
       "label": "N\u00fameros medidos (2026-08-24)",
       "file_type": "document",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L162",
       "_origin": "ast",
-      "id": "docs_prompts_03_interface_fluxos_n\u00fameros_medidos_2026_08_24",
+      "id": "docs_briefing_03_interface_fluxos_n\u00fameros_medidos_2026_08_24",
       "community": 26,
       "norm_label": "numeros medidos (2026-08-24)"
     },
     {
       "label": "O que dizer e o que n\u00e3o dizer",
       "file_type": "document",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L177",
       "_origin": "ast",
-      "id": "docs_prompts_03_interface_fluxos_o_que_dizer_e_o_que_n\u00e3o_dizer",
+      "id": "docs_briefing_03_interface_fluxos_o_que_dizer_e_o_que_n\u00e3o_dizer",
       "community": 26,
       "norm_label": "o que dizer e o que nao dizer"
     },
     {
       "label": "Depois da demo",
       "file_type": "document",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L190",
       "_origin": "ast",
-      "id": "docs_prompts_03_interface_fluxos_depois_da_demo",
+      "id": "docs_briefing_03_interface_fluxos_depois_da_demo",
       "community": 26,
       "norm_label": "depois da demo"
     },
     {
       "label": "Ideias para fortalecer",
       "file_type": "document",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L199",
       "_origin": "ast",
-      "id": "docs_prompts_03_interface_fluxos_ideias_para_fortalecer",
+      "id": "docs_briefing_03_interface_fluxos_ideias_para_fortalecer",
       "community": 26,
       "norm_label": "ideias para fortalecer"
     },
@@ -2492,7 +2492,7 @@
     {
       "label": "Circuito Atlas \u2192 Stream Processing \u2192 Iceberg \u2192 Glue \u2192 Athena",
       "file_type": "concept",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "## O circuito",
       "source_url": null,
       "captured_at": null,
@@ -2500,12 +2500,12 @@
       "contributor": null,
       "community": 33,
       "norm_label": "circuito atlas \u2192 stream processing \u2192 iceberg \u2192 glue \u2192 athena",
-      "id": "docs_prompts_01_arquitetura_circuito"
+      "id": "docs_briefing_01_arquitetura_circuito"
     },
     {
       "label": "Processor ordersToIceberg",
       "file_type": "code",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
@@ -2513,12 +2513,12 @@
       "contributor": null,
       "community": 36,
       "norm_label": "processor orderstoiceberg",
-      "id": "docs_prompts_01_arquitetura_processor_orderstoiceberg"
+      "id": "docs_briefing_01_arquitetura_processor_orderstoiceberg"
     },
     {
       "label": "MongoDB \u00e9 a fonte da verdade, Iceberg \u00e9 derivado",
       "file_type": "rationale",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "## Invariantes",
       "source_url": null,
       "captured_at": null,
@@ -2526,12 +2526,12 @@
       "contributor": null,
       "community": 8,
       "norm_label": "mongodb e a fonte da verdade, iceberg e derivado",
-      "id": "docs_prompts_01_arquitetura_mongodb_fonte_da_verdade"
+      "id": "docs_briefing_01_arquitetura_mongodb_fonte_da_verdade"
     },
     {
       "label": "Backend nunca escreve no Iceberg",
       "file_type": "rationale",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "## Decis\u00f5es",
       "source_url": null,
       "captured_at": null,
@@ -2539,12 +2539,12 @@
       "contributor": null,
       "community": 32,
       "norm_label": "backend nunca escreve no iceberg",
-      "id": "docs_prompts_01_arquitetura_backend_nunca_escreve_iceberg"
+      "id": "docs_briefing_01_arquitetura_backend_nunca_escreve_iceberg"
     },
     {
       "label": "Workspace SP10 compartilhado com a PoV de PIX",
       "file_type": "rationale",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "## Decis\u00f5es",
       "source_url": null,
       "captured_at": null,
@@ -2552,12 +2552,12 @@
       "contributor": null,
       "community": 16,
       "norm_label": "workspace sp10 compartilhado com a pov de pix",
-      "id": "docs_prompts_01_arquitetura_workspace_compartilhado"
+      "id": "docs_briefing_01_arquitetura_workspace_compartilhado"
     },
     {
       "label": "Near real-time, n\u00e3o tempo real",
       "file_type": "rationale",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "## Invariantes",
       "source_url": null,
       "captured_at": null,
@@ -2565,12 +2565,12 @@
       "contributor": null,
       "community": 34,
       "norm_label": "near real-time, nao tempo real",
-      "id": "docs_prompts_01_arquitetura_near_real_time"
+      "id": "docs_briefing_01_arquitetura_near_real_time"
     },
     {
       "label": "scripts/preflight.py",
       "file_type": "code",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
@@ -2578,12 +2578,12 @@
       "contributor": null,
       "community": 35,
       "norm_label": "scripts/preflight.py",
-      "id": "docs_prompts_01_arquitetura_preflight_py"
+      "id": "docs_briefing_01_arquitetura_preflight_py"
     },
     {
       "label": "scripts/seed_orders.py",
       "file_type": "code",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
@@ -2591,12 +2591,12 @@
       "contributor": null,
       "community": 37,
       "norm_label": "scripts/seed_orders.py",
-      "id": "docs_prompts_01_arquitetura_seed_orders_py"
+      "id": "docs_briefing_01_arquitetura_seed_orders_py"
     },
     {
       "label": "scripts/compare_aggregation.py",
       "file_type": "code",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
@@ -2604,12 +2604,12 @@
       "contributor": null,
       "community": 13,
       "norm_label": "scripts/compare_aggregation.py",
-      "id": "docs_prompts_01_arquitetura_compare_aggregation_py"
+      "id": "docs_briefing_01_arquitetura_compare_aggregation_py"
     },
     {
       "label": "sql/06_pergunta_de_negocio.sql",
       "file_type": "code",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
@@ -2617,12 +2617,12 @@
       "contributor": null,
       "community": 38,
       "norm_label": "sql/06_pergunta_de_negocio.sql",
-      "id": "docs_prompts_01_arquitetura_sql_06_pergunta_de_negocio"
+      "id": "docs_briefing_01_arquitetura_sql_06_pergunta_de_negocio"
     },
     {
       "label": "sql/08_time_travel.sql",
       "file_type": "code",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
@@ -2630,12 +2630,12 @@
       "contributor": null,
       "community": 39,
       "norm_label": "sql/08_time_travel.sql",
-      "id": "docs_prompts_01_arquitetura_sql_08_time_travel"
+      "id": "docs_briefing_01_arquitetura_sql_08_time_travel"
     },
     {
       "label": "Cole\u00e7\u00e3o iceberg_demo.orders",
       "file_type": "concept",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
@@ -2643,12 +2643,12 @@
       "contributor": null,
       "community": 43,
       "norm_label": "colecao iceberg_demo.orders",
-      "id": "docs_prompts_02_mongodb_orders_collection"
+      "id": "docs_briefing_02_mongodb_orders_collection"
     },
     {
       "label": "changeStreamPreAndPostImages",
       "file_type": "concept",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "## Pr\u00e9-requisito n\u00e3o \u00f3bvio",
       "source_url": null,
       "captured_at": null,
@@ -2656,12 +2656,12 @@
       "contributor": null,
       "community": 40,
       "norm_label": "changestreampreandpostimages",
-      "id": "docs_prompts_02_mongodb_change_stream_pre_post_images"
+      "id": "docs_briefing_02_mongodb_change_stream_pre_post_images"
     },
     {
       "label": "Pipeline $source/$match/$replaceRoot/$iceberg",
       "file_type": "code",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "## O pipeline",
       "source_url": null,
       "captured_at": null,
@@ -2669,12 +2669,12 @@
       "contributor": null,
       "community": 44,
       "norm_label": "pipeline $source/$match/$replaceroot/$iceberg",
-      "id": "docs_prompts_02_mongodb_pipeline_processor"
+      "id": "docs_briefing_02_mongodb_pipeline_processor"
     },
     {
       "label": "$replaceRoot condicional para delete",
       "file_type": "rationale",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "## O pipeline",
       "source_url": null,
       "captured_at": null,
@@ -2682,12 +2682,12 @@
       "contributor": null,
       "community": 45,
       "norm_label": "$replaceroot condicional para delete",
-      "id": "docs_prompts_02_mongodb_replaceroot_condicional"
+      "id": "docs_briefing_02_mongodb_replaceroot_condicional"
     },
     {
       "label": "Decimal128 rejeitado para a DLQ",
       "file_type": "rationale",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "## Tipos",
       "source_url": null,
       "captured_at": null,
@@ -2695,12 +2695,12 @@
       "contributor": null,
       "community": 41,
       "norm_label": "decimal128 rejeitado para a dlq",
-      "id": "docs_prompts_02_mongodb_decimal128_dlq"
+      "id": "docs_briefing_02_mongodb_decimal128_dlq"
     },
     {
       "label": "_id string com significado de neg\u00f3cio como idFieldName",
       "file_type": "rationale",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
@@ -2708,12 +2708,12 @@
       "contributor": null,
       "community": 42,
       "norm_label": "_id string com significado de negocio como idfieldname",
-      "id": "docs_prompts_02_mongodb_id_string_de_negocio"
+      "id": "docs_briefing_02_mongodb_id_string_de_negocio"
     },
     {
       "label": "Verifica\u00e7\u00e3o de consist\u00eancia total vs distinct _id",
       "file_type": "concept",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "## Verifica\u00e7\u00e3o de consist\u00eancia",
       "source_url": null,
       "captured_at": null,
@@ -2721,7 +2721,7 @@
       "contributor": null,
       "community": 46,
       "norm_label": "verificacao de consistencia total vs distinct _id",
-      "id": "docs_prompts_02_mongodb_verificacao_consistencia"
+      "id": "docs_briefing_02_mongodb_verificacao_consistencia"
     },
     {
       "label": "Processor morre no primeiro UPDATE (post-image ausente)",
@@ -2869,7 +2869,7 @@
     {
       "label": "As quatro se\u00e7\u00f5es da interface",
       "file_type": "concept",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "## As quatro se\u00e7\u00f5es da interface",
       "source_url": null,
       "captured_at": null,
@@ -2877,12 +2877,12 @@
       "contributor": null,
       "community": 51,
       "norm_label": "as quatro secoes da interface",
-      "id": "docs_prompts_03_interface_fluxos_quatro_secoes"
+      "id": "docs_briefing_03_interface_fluxos_quatro_secoes"
     },
     {
       "label": "Degrada\u00e7\u00e3o intencional sem credencial AWS",
       "file_type": "rationale",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
@@ -2890,12 +2890,12 @@
       "contributor": null,
       "community": 49,
       "norm_label": "degradacao intencional sem credencial aws",
-      "id": "docs_prompts_03_interface_fluxos_degradacao_sem_aws"
+      "id": "docs_briefing_03_interface_fluxos_degradacao_sem_aws"
     },
     {
       "label": "O Athena continua sendo a prova de formato aberto",
       "file_type": "rationale",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": null,
       "source_url": null,
       "captured_at": null,
@@ -2903,12 +2903,12 @@
       "contributor": null,
       "community": 48,
       "norm_label": "o athena continua sendo a prova de formato aberto",
-      "id": "docs_prompts_03_interface_fluxos_athena_continua_prova"
+      "id": "docs_briefing_03_interface_fluxos_athena_continua_prova"
     },
     {
       "label": "Argumento de custo: anal\u00edtico n\u00e3o roda no cluster operacional",
       "file_type": "rationale",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "Roteiro passo 7",
       "source_url": null,
       "captured_at": null,
@@ -2916,12 +2916,12 @@
       "contributor": null,
       "community": 47,
       "norm_label": "argumento de custo: analitico nao roda no cluster operacional",
-      "id": "docs_prompts_03_interface_fluxos_argumento_de_custo"
+      "id": "docs_briefing_03_interface_fluxos_argumento_de_custo"
     },
     {
       "label": "Roteiro da demo (~8 min)",
       "file_type": "document",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "## Roteiro",
       "source_url": null,
       "captured_at": null,
@@ -2929,12 +2929,12 @@
       "contributor": null,
       "community": 52,
       "norm_label": "roteiro da demo (~8 min)",
-      "id": "docs_prompts_03_interface_fluxos_roteiro_8min"
+      "id": "docs_briefing_03_interface_fluxos_roteiro_8min"
     },
     {
       "label": "Ideias para fortalecer: volume, compaction, segundo consumidor",
       "file_type": "rationale",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "## Ideias para fortalecer",
       "source_url": null,
       "captured_at": null,
@@ -2942,7 +2942,7 @@
       "contributor": null,
       "community": 50,
       "norm_label": "ideias para fortalecer: volume, compaction, segundo consumidor",
-      "id": "docs_prompts_03_interface_fluxos_ideias_fortalecer"
+      "id": "docs_briefing_03_interface_fluxos_ideias_fortalecer"
     },
     {
       "label": "Frontend index.html (React root, tema dark MongoDB)",
@@ -6157,11 +6157,11 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L1",
       "weight": 1.0,
-      "source": "docs_prompts_01_arquitetura",
-      "target": "docs_prompts_01_arquitetura_01_arquitetura",
+      "source": "docs_briefing_01_arquitetura",
+      "target": "docs_briefing_01_arquitetura_01_arquitetura",
       "confidence_score": 1.0
     },
     {
@@ -6171,77 +6171,77 @@
       "source_location": "L15",
       "weight": 1.0,
       "source": "implementation_plan",
-      "target": "docs_prompts_01_arquitetura",
+      "target": "docs_briefing_01_arquitetura",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L52",
       "weight": 1.0,
-      "source": "docs_prompts_01_arquitetura_01_arquitetura",
-      "target": "docs_prompts_01_arquitetura_como_rodar",
+      "source": "docs_briefing_01_arquitetura_01_arquitetura",
+      "target": "docs_briefing_01_arquitetura_como_rodar",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L88",
       "weight": 1.0,
-      "source": "docs_prompts_01_arquitetura_01_arquitetura",
-      "target": "docs_prompts_01_arquitetura_decis\u00f5es",
+      "source": "docs_briefing_01_arquitetura_01_arquitetura",
+      "target": "docs_briefing_01_arquitetura_decis\u00f5es",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L27",
       "weight": 1.0,
-      "source": "docs_prompts_01_arquitetura_01_arquitetura",
-      "target": "docs_prompts_01_arquitetura_invariantes",
+      "source": "docs_briefing_01_arquitetura_01_arquitetura",
+      "target": "docs_briefing_01_arquitetura_invariantes",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L3",
       "weight": 1.0,
-      "source": "docs_prompts_01_arquitetura_01_arquitetura",
-      "target": "docs_prompts_01_arquitetura_o_circuito",
+      "source": "docs_briefing_01_arquitetura_01_arquitetura",
+      "target": "docs_briefing_01_arquitetura_o_circuito",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L39",
       "weight": 1.0,
-      "source": "docs_prompts_01_arquitetura_01_arquitetura",
-      "target": "docs_prompts_01_arquitetura_ordem_de_montagem",
+      "source": "docs_briefing_01_arquitetura_01_arquitetura",
+      "target": "docs_briefing_01_arquitetura_ordem_de_montagem",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/01-arquitetura.md",
+      "source_file": "docs/briefing/01-arquitetura.md",
       "source_location": "L69",
       "weight": 1.0,
-      "source": "docs_prompts_01_arquitetura_01_arquitetura",
-      "target": "docs_prompts_01_arquitetura_scripts",
+      "source": "docs_briefing_01_arquitetura_01_arquitetura",
+      "target": "docs_briefing_01_arquitetura_scripts",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L1",
       "weight": 1.0,
-      "source": "docs_prompts_02_mongodb",
-      "target": "docs_prompts_02_mongodb_02_mongodb",
+      "source": "docs_briefing_02_mongodb",
+      "target": "docs_briefing_02_mongodb_02_mongodb",
       "confidence_score": 1.0
     },
     {
@@ -6251,77 +6251,77 @@
       "source_location": "L16",
       "weight": 1.0,
       "source": "implementation_plan",
-      "target": "docs_prompts_02_mongodb",
+      "target": "docs_briefing_02_mongodb",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L3",
       "weight": 1.0,
-      "source": "docs_prompts_02_mongodb_02_mongodb",
-      "target": "docs_prompts_02_mongodb_cole\u00e7\u00f5es",
+      "source": "docs_briefing_02_mongodb_02_mongodb",
+      "target": "docs_briefing_02_mongodb_cole\u00e7\u00f5es",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L75",
       "weight": 1.0,
-      "source": "docs_prompts_02_mongodb_02_mongodb",
-      "target": "docs_prompts_02_mongodb_dlq",
+      "source": "docs_briefing_02_mongodb_02_mongodb",
+      "target": "docs_briefing_02_mongodb_dlq",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L52",
       "weight": 1.0,
-      "source": "docs_prompts_02_mongodb_02_mongodb",
-      "target": "docs_prompts_02_mongodb_o_pipeline",
+      "source": "docs_briefing_02_mongodb_02_mongodb",
+      "target": "docs_briefing_02_mongodb_o_pipeline",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L38",
       "weight": 1.0,
-      "source": "docs_prompts_02_mongodb_02_mongodb",
-      "target": "docs_prompts_02_mongodb_pr\u00e9_requisito_n\u00e3o_\u00f3bvio",
+      "source": "docs_briefing_02_mongodb_02_mongodb",
+      "target": "docs_briefing_02_mongodb_pr\u00e9_requisito_n\u00e3o_\u00f3bvio",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L89",
       "weight": 1.0,
-      "source": "docs_prompts_02_mongodb_02_mongodb",
-      "target": "docs_prompts_02_mongodb_tipos_o_que_passa_e_o_que_n\u00e3o_passa",
+      "source": "docs_briefing_02_mongodb_02_mongodb",
+      "target": "docs_briefing_02_mongodb_tipos_o_que_passa_e_o_que_n\u00e3o_passa",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/02-mongodb.md",
+      "source_file": "docs/briefing/02-mongodb.md",
       "source_location": "L106",
       "weight": 1.0,
-      "source": "docs_prompts_02_mongodb_02_mongodb",
-      "target": "docs_prompts_02_mongodb_verifica\u00e7\u00e3o_de_consist\u00eancia",
+      "source": "docs_briefing_02_mongodb_02_mongodb",
+      "target": "docs_briefing_02_mongodb_verifica\u00e7\u00e3o_de_consist\u00eancia",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L1",
       "weight": 1.0,
-      "source": "docs_prompts_03_interface_fluxos",
-      "target": "docs_prompts_03_interface_fluxos_03_interface_e_fluxos",
+      "source": "docs_briefing_03_interface_fluxos",
+      "target": "docs_briefing_03_interface_fluxos_03_interface_e_fluxos",
       "confidence_score": 1.0
     },
     {
@@ -6331,87 +6331,87 @@
       "source_location": "L17",
       "weight": 1.0,
       "source": "implementation_plan",
-      "target": "docs_prompts_03_interface_fluxos",
+      "target": "docs_briefing_03_interface_fluxos",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L31",
       "weight": 1.0,
-      "source": "docs_prompts_03_interface_fluxos_03_interface_e_fluxos",
-      "target": "docs_prompts_03_interface_fluxos_antes_de_apresentar",
+      "source": "docs_briefing_03_interface_fluxos_03_interface_e_fluxos",
+      "target": "docs_briefing_03_interface_fluxos_antes_de_apresentar",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L19",
       "weight": 1.0,
-      "source": "docs_prompts_03_interface_fluxos_03_interface_e_fluxos",
-      "target": "docs_prompts_03_interface_fluxos_as_quatro_capacidades_da_interface",
+      "source": "docs_briefing_03_interface_fluxos_03_interface_e_fluxos",
+      "target": "docs_briefing_03_interface_fluxos_as_quatro_capacidades_da_interface",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L190",
       "weight": 1.0,
-      "source": "docs_prompts_03_interface_fluxos_03_interface_e_fluxos",
-      "target": "docs_prompts_03_interface_fluxos_depois_da_demo",
+      "source": "docs_briefing_03_interface_fluxos_03_interface_e_fluxos",
+      "target": "docs_briefing_03_interface_fluxos_depois_da_demo",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L8",
       "weight": 1.0,
-      "source": "docs_prompts_03_interface_fluxos_03_interface_e_fluxos",
-      "target": "docs_prompts_03_interface_fluxos_estado_atual_modo_palco",
+      "source": "docs_briefing_03_interface_fluxos_03_interface_e_fluxos",
+      "target": "docs_briefing_03_interface_fluxos_estado_atual_modo_palco",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L199",
       "weight": 1.0,
-      "source": "docs_prompts_03_interface_fluxos_03_interface_e_fluxos",
-      "target": "docs_prompts_03_interface_fluxos_ideias_para_fortalecer",
+      "source": "docs_briefing_03_interface_fluxos_03_interface_e_fluxos",
+      "target": "docs_briefing_03_interface_fluxos_ideias_para_fortalecer",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L162",
       "weight": 1.0,
-      "source": "docs_prompts_03_interface_fluxos_03_interface_e_fluxos",
-      "target": "docs_prompts_03_interface_fluxos_n\u00fameros_medidos_2026_08_24",
+      "source": "docs_briefing_03_interface_fluxos_03_interface_e_fluxos",
+      "target": "docs_briefing_03_interface_fluxos_n\u00fameros_medidos_2026_08_24",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L177",
       "weight": 1.0,
-      "source": "docs_prompts_03_interface_fluxos_03_interface_e_fluxos",
-      "target": "docs_prompts_03_interface_fluxos_o_que_dizer_e_o_que_n\u00e3o_dizer",
+      "source": "docs_briefing_03_interface_fluxos_03_interface_e_fluxos",
+      "target": "docs_briefing_03_interface_fluxos_o_que_dizer_e_o_que_n\u00e3o_dizer",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "docs/prompts/03-interface-fluxos.md",
+      "source_file": "docs/briefing/03-interface-fluxos.md",
       "source_location": "L53",
       "weight": 1.0,
-      "source": "docs_prompts_03_interface_fluxos_03_interface_e_fluxos",
-      "target": "docs_prompts_03_interface_fluxos_roteiro_8_min",
+      "source": "docs_briefing_03_interface_fluxos_03_interface_e_fluxos",
+      "target": "docs_briefing_03_interface_fluxos_roteiro_8_min",
       "confidence_score": 1.0
     },
     {

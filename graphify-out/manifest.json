@@ -199,7 +199,7 @@
     "ast_hash": "e2294e4b61e12e8733b7759874ce06a7",
     "semantic_hash": "e2294e4b61e12e8733b7759874ce06a7"
   },
-  "CLAUDE.md": {
+  "docs/DEV_NOTES.md": {
     "mtime": 1787601305.376769,
     "ast_hash": "f0da3c72f5ceb96ad43a7ec8006b226c",
     "semantic_hash": "f0da3c72f5ceb96ad43a7ec8006b226c"
@@ -224,17 +224,17 @@
     "ast_hash": "3a92b61fbcec7e9b4b44d7900e5b2c35",
     "semantic_hash": ""
   },
-  "docs/prompts/01-arquitetura.md": {
+  "docs/briefing/01-arquitetura.md": {
     "mtime": 1787601305.3810444,
     "ast_hash": "075d93af2e7cc79de74fc75277deba13",
     "semantic_hash": "075d93af2e7cc79de74fc75277deba13"
   },
-  "docs/prompts/02-mongodb.md": {
+  "docs/briefing/02-mongodb.md": {
     "mtime": 1787601305.38137,
     "ast_hash": "692eb1185ad883e79822227dec376bb7",
     "semantic_hash": "692eb1185ad883e79822227dec376bb7"
   },
-  "docs/prompts/03-interface-fluxos.md": {
+  "docs/briefing/03-interface-fluxos.md": {
     "mtime": 1787658696.0186396,
     "ast_hash": "4ea999cd6509291628065ecf959bdfcf",
     "semantic_hash": ""

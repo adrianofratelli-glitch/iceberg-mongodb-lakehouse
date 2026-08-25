@@ -8,7 +8,7 @@ PoV de portfólio: uma coleção do MongoDB Atlas replicada como tabela Apache
 Iceberg no S3 via Atlas Stream Processing, consultada por Athena com catálogo
 Glue. Insert, update, delete e schema evolution propagam sem ETL.
 
-Comece por `implementation_plan.md` e pelos três briefings em `docs/prompts/`.
+Comece por `implementation_plan.md` e pelos três briefings em `docs/briefing/`.
 `docs/TROUBLESHOOTING.md` lista as nove falhas já encontradas contra o ambiente
 real — leia antes de debugar qualquer coisa.
 
