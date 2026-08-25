@@ -131,3 +131,16 @@ aws sso login --profile <name>
 
 preflight detects a configured SSO profile and prints that command instead of
 opening the editor.
+
+
+## Propagating is not duplication
+
+The UI separates two states that look alike in a count comparison:
+
+| State | Condition | What it means |
+|---|---|---|
+| `propagando` | counts differ, `total == distinct ids` | the CDC event is still in flight — wait |
+| `tabela duplicada` | `total > distinct ids` | a restart without a checkpoint re-ran initialSync |
+
+Only the second is a defect. Reading a lagging count as duplication sends you
+dropping and rebuilding a table that was never broken.

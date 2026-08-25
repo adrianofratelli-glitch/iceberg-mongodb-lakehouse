@@ -65,12 +65,8 @@ export default function App() {
       <main id="conteudo-principal">
         <div className="hero">
           <p className="eyebrow">Lakehouse · Change data capture</p>
-          <h1>Uma coleção operacional que também é <em>tabela Iceberg</em>.</h1>
-          <p>
-            Insert, update, delete e campo novo saem do MongoDB e chegam a uma tabela
-            Apache Iceberg no S3, consultável por Athena. Sem ETL, sem Spark, sem
-            Debezium. As duas metades abaixo deveriam mostrar o mesmo número.
-          </p>
+          <h1>MongoDB entra. <em>Iceberg converge.</em></h1>
+          <p>Insert, update, delete e schema evolution — sem ETL.</p>
         </div>
 
         {erro && <div className="notice bad"><strong>Backend indisponível.</strong> {erro}</div>}
@@ -120,8 +116,15 @@ export default function App() {
                     <div className="kv"><span>Colunas no catálogo</span><span>{fmtInt(schema?.colunas?.length)}</span></div>
                   </div>
                 </>
+              ) : !visao ? (
+                <p className="empty">Consultando o catálogo…</p>
               ) : (
-                <AvisoAws erro={iceberg?.erro || aws?.detalhe} />
+                // aws.detalhe só é mensagem de erro quando a checagem falhou;
+                // no caso de sucesso ele carrega o ARN da identidade, que não
+                // deve aparecer na tela nem ser tratado como falha.
+                <AvisoAws
+                  erro={iceberg?.erro || (aws?.estado !== 'ok' ? aws?.detalhe : null)}
+                />
               )}
             </article>
           </div>
@@ -167,50 +170,19 @@ export default function App() {
           </div>
         </section>
 
-        <section>
-          <div className="section-head">
-            <h2>Time travel</h2>
-            <span className="hint">ninguém configurou versionamento — vem do formato</span>
-          </div>
-          <div className="card">
+        <details className="card secondary-stage">
+          <summary>Time travel</summary>
+          <div className="secondary-stage__body">
             <TimeTravel />
           </div>
-        </section>
+        </details>
 
-        <section>
-          <div className="section-head">
-            <h2>Consultas analíticas</h2>
-            <span className="hint">o relatório que ninguém rodaria no cluster transacional</span>
-          </div>
-          <div className="card">
+        <details className="card secondary-stage">
+          <summary>Consultas analíticas</summary>
+          <div className="secondary-stage__body">
             <Consultas />
           </div>
-        </section>
-
-        {schema?.colunas?.length > 0 && (
-          <section>
-            <div className="section-head">
-              <h2>Schema no catálogo Glue</h2>
-              <span className="hint">campo novo no MongoDB vira coluna aqui, sem migração</span>
-            </div>
-            <div className="card">
-              <div className="grid four">
-                {schema.colunas.map((c) => (
-                  <div key={c.nome} className="kv">
-                    <span className="mono">{c.nome}</span>
-                    <span>{c.tipo}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        <footer>
-          MongoDB Atlas Stream Processing → Apache Iceberg → S3 + Glue → Athena ·
-          {' '}região sa-east-1 · o Iceberg é derivado e descartável: dropar a tabela e
-          reiniciar o processor reconstrói tudo a partir do Atlas.
-        </footer>
+        </details>
       </main>
     </div>
   )

@@ -13,7 +13,7 @@ nossa tela, não teríamos provado nada.
 
 | Seção | O que mostra |
 |---|---|
-| As duas metades | contagem do MongoDB × contagem do Iceberg, com selo de convergência |
+| As duas metades | contagem do MongoDB × contagem do Iceberg, com selo de convergência: `convergido`, `propagando` (CDC a caminho) ou `tabela duplicada` (defeito real) |
 | Ciclo CDC ao vivo | os quatro botões, o documento no Mongo e a linha no Iceberg, cronometrados |
 | Time travel | snapshots clicáveis; clicar mostra o pedido naquele instante |
 | Consultas analíticas | roda os arquivos de `sql/` no Athena e mostra tempo e bytes escaneados |

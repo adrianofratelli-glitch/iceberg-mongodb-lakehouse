@@ -28,8 +28,10 @@ synchronisation job produced it.
 ### 2. An order enters through the transactional path
 
 `INSERT` writes to MongoDB. The change stream carries it; the UI times how long
-the row takes to appear in Iceberg — measured at 6 to 71 seconds depending on
-where the write lands relative to the processor's commit.
+the row takes to appear in Iceberg — 6 seconds in the run below, and up to a
+minute depending on where the write lands relative to the processor's commit.
+
+![The live CDC panel: the order in MongoDB and the same row reflected in Iceberg after 6 seconds](docs/screenshots/02-ciclo-cdc.png)
 
 ### 3. The update lands in the lake
 

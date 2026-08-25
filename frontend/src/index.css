@@ -189,6 +189,11 @@ tbody tr.selected td { background: rgba(0, 237, 100, 0.09); color: var(--text-pr
 
 footer { margin-top: 60px; padding-top: 22px; border-top: 1px solid var(--border-subtle); color: var(--text-muted); font-size: 0.82rem; }
 
+.secondary-stage { margin-top: 18px; padding: 0; overflow: hidden; }
+.secondary-stage > summary { min-height: 52px; display: flex; align-items: center; padding: 0 18px; cursor: pointer; color: var(--text-pri); font-weight: 700; }
+.secondary-stage[open] > summary { border-bottom: 1px solid var(--border-subtle); }
+.secondary-stage__body { padding: 18px; }
+
 @media (max-width: 640px) {
   th, td { white-space: normal; }
 }
