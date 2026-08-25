@@ -5,11 +5,18 @@ pelo backend FastAPI na 8250. Ela existe para o que um terminal não mostra bem:
 as duas metades do circuito lado a lado, convergindo, e o cronômetro da
 propagação rodando ao vivo.
 
+## Estado atual — modo palco
+
+O palco principal contém convergência MongoDB → Iceberg e o ciclo CDC ao vivo.
+Time travel e consultas analíticas ficam recolhidos em **Análises adicionais**;
+o schema Glue deixa de ser uma seção própria. As quatro capacidades abaixo
+continuam suportadas, mas somente as duas primeiras abrem expandidas.
+
 O console do Athena continua no roteiro. A UI prepara o momento; abrir o Athena
 e rodar a mesma query é o que prova formato aberto — se o dado só existisse na
 nossa tela, não teríamos provado nada.
 
-## As quatro seções da interface
+## As quatro capacidades da interface
 
 | Seção | O que mostra |
 |---|---|

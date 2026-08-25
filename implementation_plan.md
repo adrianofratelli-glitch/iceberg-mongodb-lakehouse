@@ -16,6 +16,7 @@ propagando sozinhos — sem ETL, sem Spark, sem Debezium, sem Kafka.
 | [docs/prompts/02-mongodb.md](docs/prompts/02-mongodb.md) | coleções, pre/post images, DLQ, pipeline do processor |
 | [docs/prompts/03-interface-fluxos.md](docs/prompts/03-interface-fluxos.md) | roteiro da demo, queries Athena, o que dizer e o que não dizer |
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | as nove falhas medidas, com sintoma e cura |
+| [docs/DEV_NOTES.md](docs/DEV_NOTES.md) | comandos, dois venvs e invariantes que quebram a demo |
 | [graphify-out/GRAPH_REPORT.md](graphify-out/GRAPH_REPORT.md) | grafo do código — gerado, nunca editar à mão |
 
 ## Estado

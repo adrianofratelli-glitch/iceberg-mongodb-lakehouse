@@ -1,6 +1,6 @@
-# CLAUDE.md
+# Notas de desenvolvimento
 
-Orientações para o Claude Code neste repositório.
+O que é preciso saber antes de mexer neste repositório.
 
 ## O que é
 
@@ -61,12 +61,10 @@ conexões inesperadas, e `graph.html` para abrir no navegador.
 Regenerar após mudanças estruturais:
 
 ```bash
-/graphify .            # rebuild completo
-/graphify . --update   # só arquivos novos ou alterados
+graphify .            # rebuild completo
+graphify . --update   # só arquivos novos ou alterados
+graphify query "como o backend lê o Iceberg?"
 ```
-
-Perguntas sobre o repositório podem ser respondidas pelo grafo em vez de leitura
-de arquivo: `graphify query "como o backend lê o Iceberg?"`.
 
 ## Interface
 

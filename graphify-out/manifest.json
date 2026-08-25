@@ -30,9 +30,9 @@
     "semantic_hash": "6fa246a6961dabc8fbd9b79765c6fbaa"
   },
   "frontend/src/App.jsx": {
-    "mtime": 1787601305.389044,
-    "ast_hash": "8a031a5b4e994c996c12d332a785c337",
-    "semantic_hash": "8a031a5b4e994c996c12d332a785c337"
+    "mtime": 1787658071.7283788,
+    "ast_hash": "7cac4da583f74f2302a73b5cbf2eca2b",
+    "semantic_hash": ""
   },
   "frontend/src/api.js": {
     "mtime": 1787601305.389369,
@@ -205,9 +205,9 @@
     "semantic_hash": "f0da3c72f5ceb96ad43a7ec8006b226c"
   },
   "README.md": {
-    "mtime": 1787602812.408473,
-    "ast_hash": "0234d573bb5f974fe9579613208c40b3",
-    "semantic_hash": "0234d573bb5f974fe9579613208c40b3"
+    "mtime": 1787658279.096224,
+    "ast_hash": "87b3f29dbd982f593c13172562c208de",
+    "semantic_hash": ""
   },
   "backend/requirements.txt": {
     "mtime": 1787601305.379173,
@@ -220,9 +220,9 @@
     "semantic_hash": "c1842e4ab5b4514c031f0ddba79bd6cd"
   },
   "docs/TROUBLESHOOTING.md": {
-    "mtime": 1787601305.38058,
-    "ast_hash": "880b1d460a96f656e92ba3e039eb729d",
-    "semantic_hash": "880b1d460a96f656e92ba3e039eb729d"
+    "mtime": 1787658358.3157394,
+    "ast_hash": "3a92b61fbcec7e9b4b44d7900e5b2c35",
+    "semantic_hash": ""
   },
   "docs/prompts/01-arquitetura.md": {
     "mtime": 1787601305.3810444,
@@ -235,9 +235,9 @@
     "semantic_hash": "692eb1185ad883e79822227dec376bb7"
   },
   "docs/prompts/03-interface-fluxos.md": {
-    "mtime": 1787601305.3818543,
-    "ast_hash": "9a5408c4e5af81c6e44e6d91eeb98d78",
-    "semantic_hash": "9a5408c4e5af81c6e44e6d91eeb98d78"
+    "mtime": 1787658696.0186396,
+    "ast_hash": "4ea999cd6509291628065ecf959bdfcf",
+    "semantic_hash": ""
   },
   "frontend/index.html": {
     "mtime": 1787601305.387701,
@@ -245,9 +245,9 @@
     "semantic_hash": "8efc2e269bbf7a56646234df449e2e29"
   },
   "implementation_plan.md": {
-    "mtime": 1787601305.3934808,
-    "ast_hash": "bfad73a277152358f4ca1e4e59df1c3a",
-    "semantic_hash": "bfad73a277152358f4ca1e4e59df1c3a"
+    "mtime": 1787658909.5740144,
+    "ast_hash": "f6c965491d81f787cd5d8cef3a1c409c",
+    "semantic_hash": ""
   },
   "requirements.txt": {
     "mtime": 1787601305.3939884,
@@ -275,9 +275,9 @@
     "semantic_hash": "e354c99a889a73817d797693b120db8a"
   },
   "docs/screenshots/02-ciclo-cdc.png": {
-    "mtime": 1787601305.3841288,
-    "ast_hash": "78c4b8cfe7458bbd68803624ff0fbf6a",
-    "semantic_hash": "78c4b8cfe7458bbd68803624ff0fbf6a"
+    "mtime": 1787658259.4335253,
+    "ast_hash": "85c2903a03570d9de0c10798871ee8bd",
+    "semantic_hash": ""
   },
   "docs/screenshots/03-update-refletido.png": {
     "mtime": 1787601305.3849995,
@@ -293,5 +293,10 @@
     "mtime": 1787601305.387363,
     "ast_hash": "829e17951cda75fc924a8eae1ca5e728",
     "semantic_hash": "829e17951cda75fc924a8eae1ca5e728"
+  },
+  "docs/DEV_NOTES.md": {
+    "mtime": 1787658901.3473432,
+    "ast_hash": "e7342581d7b55ca663a9961ad72e1c18",
+    "semantic_hash": ""
   }
 }
