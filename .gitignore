@@ -17,3 +17,7 @@ __pycache__/
 node_modules/
 dist/
 backend/venv/
+
+# Cache local do graphify (o grafo em si é versionado)
+graphify-out/cache/
+graphify-out/.graphify_*

@@ -26,13 +26,25 @@ export default function App() {
   const aws = preflight?.checks?.find((c) => c.item === 'Credencial AWS')
   const postImages = preflight?.checks?.find((c) => c.item === 'changeStreamPreAndPostImages')
 
+  // Duas divergências diferentes: tabela duplicada (total > ids) e propagação
+  // pendente (contagens diferentes, mas sem duplicata). Dizer "duplicada" na
+  // segunda é alarme falso — é só o CDC ainda a caminho.
+  const duplicada =
+    iceberg?.disponivel && iceberg.total > iceberg.distintos
+  const propagando =
+    iceberg?.disponivel && !duplicada && iceberg.total !== mongo?.total
+
   const estado = !visao
     ? { classe: '', texto: 'carregando' }
     : visao.convergiu
       ? { classe: 'ok', texto: 'convergido' }
-      : iceberg?.disponivel
-        ? { classe: 'warn', texto: 'divergente' }
-        : { classe: 'warn', texto: 'iceberg offline' }
+      : duplicada
+        ? { classe: 'bad', texto: 'tabela duplicada' }
+        : propagando
+          ? { classe: 'warn', texto: 'propagando' }
+          : iceberg?.disponivel
+            ? { classe: 'warn', texto: 'divergente' }
+            : { classe: 'warn', texto: 'iceberg offline' }
 
   return (
     <div data-pov-shell>
@@ -121,11 +133,22 @@ export default function App() {
                   <strong>Convergido.</strong> Os dois lados têm {fmtInt(mongo.total)} pedidos,
                   sem duplicata. Nenhum job de sincronização produziu esse número.
                 </>
+              ) : duplicada ? (
+                <>
+                  <strong>Tabela duplicada.</strong> O Iceberg tem {fmtInt(iceberg.total)} linhas
+                  para {fmtInt(iceberg.distintos)} ids distintos. Total maior que ids significa que
+                  um restart sem checkpoint reexecutou o initialSync — ver docs/TROUBLESHOOTING.md.
+                </>
+              ) : propagando ? (
+                <>
+                  <strong>Propagando.</strong> MongoDB tem {fmtInt(mongo?.total)} e o Iceberg
+                  tem {fmtInt(iceberg?.total)}, sem duplicata ({fmtInt(iceberg?.distintos)} ids
+                  distintos). É o CDC a caminho: leva de 10 a 60 segundos. Recarregue em instantes.
+                </>
               ) : iceberg?.disponivel ? (
                 <>
                   <strong>Divergente.</strong> MongoDB tem {fmtInt(mongo?.total)} e o Iceberg
-                  tem {fmtInt(iceberg?.total)} linhas ({fmtInt(iceberg?.distintos)} ids). Total maior
-                  que ids significa tabela duplicada por restart — ver docs/TROUBLESHOOTING.md.
+                  tem {fmtInt(iceberg?.total)} linhas ({fmtInt(iceberg?.distintos)} ids).
                 </>
               ) : (
                 <><strong>Só metade do circuito está visível.</strong> O lado MongoDB responde; o Iceberg precisa de credencial AWS.</>

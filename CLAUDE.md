@@ -52,6 +52,22 @@ de boto3 e fastapi.
 4. `Decimal128` e conflito de tipo vão para a DLQ (`iceberg_demo.dlq`).
 5. O backend nunca escreve no Iceberg. Quem alimenta a tabela é o processor.
 
+## Grafo de código
+
+`graphify-out/` é gerado — nunca edite à mão. Contém o grafo do repositório
+(226 nós, 305 arestas, 23 comunidades), o `GRAPH_REPORT.md` com god nodes e
+conexões inesperadas, e `graph.html` para abrir no navegador.
+
+Regenerar após mudanças estruturais:
+
+```bash
+/graphify .            # rebuild completo
+/graphify . --update   # só arquivos novos ou alterados
+```
+
+Perguntas sobre o repositório podem ser respondidas pelo grafo em vez de leitura
+de arquivo: `graphify query "como o backend lê o Iceberg?"`.
+
 ## Interface
 
 Antes de mexer no frontend, leia o `POV_UI_DESIGN_SYSTEM.md` na raiz do
