@@ -72,6 +72,39 @@ Check the queue with:
 db.dlq.find().sort({ dlqTime: -1 }).limit(5)
 ```
 
+## `Resume of change stream was not possible`
+
+```
+Resume of change stream was not possible. The processor's most recent
+checkpoint's resume point is no longer in the oplog.
+```
+
+The processor sat stopped (or FAILED) for longer than the source cluster's oplog
+window, so the resume token stored in its last checkpoint has already rolled off
+the oplog. Nothing is wrong with the pipeline or the connections -- check
+`details.checkpoint.timestamp` in the error and compare it with the oplog window.
+
+A processor in `FAILED` state does not accept `stop()` ("stream processor must be
+running in order to be stopped"); go straight to the start.
+
+The only way out is starting without the checkpoint, which for this processor
+means rebuilding the table -- `resumeFromCheckpoint: false` re-runs initialSync
+and appends a full copy (see the next section). Drop the table first:
+
+```sql
+DROP TABLE IF EXISTS mongodb_iceberg_demo.orders   -- Athena
+```
+```
+load("stream-processing/restart_processor.js")
+```
+
+Everything written to the source between the checkpoint timestamp and the restart
+is not replayed from the stream -- initialSync picks it up from the collection,
+which is the source of truth, so the table still comes back complete.
+
+Hit on 2026-09-01 with checkpoints from 2026-08-27: all three processors in the
+`spi-inter-pix` workspace failed this way at the same time.
+
 ## Duplicate rows in Athena after a restart
 
 Symptom: `SELECT count(*)` in Athena returns a multiple of the MongoDB count
