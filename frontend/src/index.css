@@ -98,7 +98,7 @@ section { margin-top: clamp(36px, 5vw, 60px); }
 .section-head .hint { color: var(--text-muted); font-size: 0.92rem; }
 
 .grid { display: grid; gap: 16px; }
-.grid.two { grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); }
+.grid.two { grid-template-columns: repeat(auto-fit, minmax(min(310px, 100%), 1fr)); }
 .grid.four { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
 
 .card {

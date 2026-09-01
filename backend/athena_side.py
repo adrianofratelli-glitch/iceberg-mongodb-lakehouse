@@ -4,6 +4,7 @@ Degrades on purpose: AWS credentials expire between demos, and the UI must say
 so plainly instead of showing a spinner forever.
 """
 
+import re
 import time
 
 import boto3
@@ -139,8 +140,7 @@ def order_at_snapshot(order_id: str, snapshot_id: str) -> dict:
 
 
 def _safe(value: str) -> str:
-    """Athena has no bind parameters here; keep the identifiers boring."""
-    cleaned = "".join(ch for ch in value if ch.isalnum() or ch in "-_")
-    if not cleaned:
+    """Athena has no bind parameters here; reject anything but a boring ID."""
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,127}", value):
         raise ValueError("Identificador inválido.")
-    return cleaned
+    return value

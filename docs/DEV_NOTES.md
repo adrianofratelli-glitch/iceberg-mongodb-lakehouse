@@ -51,6 +51,9 @@ de boto3 e fastapi.
 3. Nome de campo com `.` derruba o processor e não vai para a DLQ.
 4. `Decimal128` e conflito de tipo vão para a DLQ (`iceberg_demo.dlq`).
 5. O backend nunca escreve no Iceberg. Quem alimenta a tabela é o processor.
+6. IDs vindos de rota nunca são “limpos” silenciosamente. Pedido e consulta usam
+   allowlist; snapshot é inteiro positivo limitado. Entrada fora do contrato
+   recebe `422` antes de chegar ao MongoDB, Athena ou filesystem.
 
 ## Grafo de código
 

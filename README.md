@@ -111,6 +111,17 @@ working and the UI says what is missing.
 Athena queries live in `sql/`, from per-step validation to the business question
 and the time travel snippets.
 
+## Adversarial tests
+
+```bash
+backend/venv/bin/pip install -r backend/requirements-dev.txt
+backend/venv/bin/pytest -q backend/tests
+```
+
+The suite rejects malformed or oversized order IDs, SQL-like snapshot values and
+query traversal before MongoDB, Athena or the filesystem is touched. Snapshot IDs
+are positive bounded integers; order and query IDs use an explicit allowlist.
+
 ## Before every demo
 
 ```bash

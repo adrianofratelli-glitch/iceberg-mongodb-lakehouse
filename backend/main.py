@@ -6,8 +6,9 @@ justamente que elas convergem sozinhas.
 """
 
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Path as ApiPath
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -25,6 +26,15 @@ app.add_middleware(
 )
 
 SQL_DIR = Path(__file__).resolve().parents[1] / "sql"
+OrderId = Annotated[
+    str,
+    ApiPath(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"),
+]
+SnapshotId = Annotated[int, ApiPath(ge=1, le=9_223_372_036_854_775_807)]
+QueryId = Annotated[
+    str,
+    ApiPath(min_length=1, max_length=80, pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$"),
+]
 
 
 @app.get("/health/live")
@@ -115,7 +125,7 @@ def schema():
 
 
 @app.get("/api/pedido/{order_id}")
-def pedido(order_id: str):
+def pedido(order_id: OrderId):
     doc = mongo_side.find_order(order_id)
     if doc and isinstance(doc.get("orderDate"), object):
         doc = {**doc, "orderDate": str(doc.get("orderDate"))}
@@ -185,7 +195,7 @@ def snapshots():
 
 
 @app.get("/api/snapshots/{snapshot_id}/pedido/{order_id}")
-def pedido_no_snapshot(snapshot_id: str, order_id: str):
+def pedido_no_snapshot(snapshot_id: SnapshotId, order_id: OrderId):
     try:
         return {"disponivel": True, **athena_side.order_at_snapshot(order_id, snapshot_id)}
     except athena_side.AwsUnavailable as exc:
@@ -212,7 +222,7 @@ def _titulo(path: Path) -> str:
 
 
 @app.post("/api/consultas/{consulta_id}")
-def rodar_consulta(consulta_id: str):
+def rodar_consulta(consulta_id: QueryId):
     caminho = SQL_DIR / f"{consulta_id}.sql"
     if not caminho.exists() or caminho.parent != SQL_DIR:
         raise HTTPException(status_code=404, detail="Consulta desconhecida.")

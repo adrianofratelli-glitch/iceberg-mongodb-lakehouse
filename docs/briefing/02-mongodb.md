@@ -103,6 +103,12 @@ Medido contra o cluster real:
 produção. Numa implantação real, ou o campo vira double na origem, ou entra um
 `$addFields` de conversão antes do `$iceberg`.
 
+As rotas de leitura não interpolam identificadores arbitrários. `order_id` e
+`query_id` aceitam somente `[A-Za-z0-9_-]` com limite de 128 caracteres; snapshots
+são inteiros positivos de até 64 bits. A validação acontece no FastAPI e
+`athena_side._safe()` repete a guarda antes de montar SQL. Entrada inválida é
+rejeitada, nunca reescrita para outro identificador.
+
 ## Verificação de consistência
 
 ```js
