@@ -18,6 +18,7 @@ export const api = {
     fetch(`/api/snapshots/${snapshotId}/pedido/${orderId}`).then(json),
   consultas: () => fetch('/api/consultas').then(json),
   rodarConsulta: (id) => fetch(`/api/consultas/${id}`, { method: 'POST' }).then(json),
+  lag: () => fetch('/api/lag').then(json),
 }
 
 export const fmtInt = (n) =>

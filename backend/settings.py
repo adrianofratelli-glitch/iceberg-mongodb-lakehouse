@@ -24,3 +24,11 @@ ATHENA_OUTPUT = os.getenv(
 
 LIVE_ORDER_ID = "PED-AOVIVO-001"
 SCHEMA_ORDER_ID = "PED-AOVIVO-002"
+
+# Stream Processing: connection string to the ASP *workspace* (not the source
+# cluster -- that's MONGODB_URI above). Only used by /api/lag to shell out to
+# mongosh and read sp.<PROCESSOR_NAME>.stats(), since pymongo cannot talk to
+# an ASP workspace directly. Optional: /api/lag degrades gracefully when unset.
+STREAM_PROCESSING_URI = os.getenv("STREAM_PROCESSING_URI", "")
+PROCESSOR_NAME = os.getenv("PROCESSOR_NAME", "ordersToIceberg")
+MONGOSH_PATH = os.getenv("MONGOSH_PATH", "mongosh")

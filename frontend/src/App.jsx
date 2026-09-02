@@ -10,6 +10,7 @@ export default function App() {
   const [schema, setSchema] = useState(null)
   const [preflight, setPreflight] = useState(null)
   const [erro, setErro] = useState(null)
+  const [lag, setLag] = useState(null)
 
   const carregar = useCallback(() => {
     api.visaoGeral().then(setVisao).catch((e) => setErro(e.message))
@@ -19,6 +20,7 @@ export default function App() {
   useEffect(() => {
     carregar()
     api.preflight().then(setPreflight).catch(() => setPreflight(null))
+    api.lag().then(setLag).catch(() => setLag(null))
   }, [carregar])
 
   const mongo = visao?.mongo
@@ -60,6 +62,15 @@ export default function App() {
           <span className="dot" aria-hidden="true" />
           {estado.texto}
         </span>
+        {lag?.disponivel && (
+          <span
+            className={`pill ${lag.estado === 'ok' ? 'ok' : lag.estado === 'critico' ? 'bad' : 'warn'}`}
+            title={lag.mensagem}
+          >
+            <span className="dot" aria-hidden="true" />
+            lag: {lag.estado === 'ok' ? 'OK' : lag.estado === 'critico' ? 'CRÍTICO — restart próximo pode duplicar dados' : lag.estado === 'alerta' ? 'ALERTA' : 'desconhecido'}
+          </span>
+        )}
       </header>
 
       <main id="conteudo-principal">

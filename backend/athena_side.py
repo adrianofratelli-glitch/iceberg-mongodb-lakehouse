@@ -40,49 +40,99 @@ def _friendly(exc: Exception) -> str:
     return text[:300]
 
 
-def run_query(sql: str, timeout: int = 60) -> dict:
-    """Run one Athena query and return columns plus rows."""
+# Errors worth a short retry: transient network/throttling, not "your
+# credentials are wrong" or "your SQL is wrong".
+_TRANSIENT_ERROR_CODES = {
+    "ThrottlingException",
+    "TooManyRequestsException",
+    "RequestTimeout",
+    "RequestTimeoutException",
+    "InternalServerException",
+    "InternalFailure",
+    "ServiceUnavailable",
+    "ServiceUnavailableException",
+}
+
+
+def _is_transient(exc: ClientError) -> bool:
+    code = exc.response.get("Error", {}).get("Code", "")
+    return code in _TRANSIENT_ERROR_CODES
+
+
+def run_query(sql: str, timeout: int = 60, retries: int = 3) -> dict:
+    """Run one Athena query and return columns plus rows.
+
+    Retries a small, fixed number of times (short backoff) on transient
+    ClientErrors (throttling, transient service errors) before giving up.
+    Credential errors and query failures are not retried.
+    """
     started = time.perf_counter()
-    try:
-        athena = _client("athena")
-        execution = athena.start_query_execution(
-            QueryString=sql.strip().rstrip(";"),
-            QueryExecutionContext={"Database": settings.GLUE_DATABASE},
-            ResultConfiguration={"OutputLocation": settings.ATHENA_OUTPUT},
-            WorkGroup=settings.ATHENA_WORKGROUP,
-        )
-        qid = execution["QueryExecutionId"]
+    last_exc: Exception | None = None
+    for attempt in range(1, retries + 1):
+        try:
+            return _run_query_once(sql, timeout, started)
+        except (NoCredentialsError, BotoCoreError) as exc:
+            raise AwsUnavailable(_friendly(exc)) from exc
+        except ClientError as exc:
+            last_exc = exc
+            if not _is_transient(exc) or attempt == retries:
+                raise AwsUnavailable(_friendly(exc)) from exc
+            time.sleep(0.5 * attempt)  # short linear backoff: 0.5s, 1.0s, ...
+    # Unreachable in practice -- the loop above always returns or raises.
+    raise AwsUnavailable(_friendly(last_exc)) if last_exc else RuntimeError("run_query failed")
 
-        deadline = time.monotonic() + timeout
-        while time.monotonic() < deadline:
-            info = athena.get_query_execution(QueryExecutionId=qid)["QueryExecution"]
-            state = info["Status"]["State"]
-            if state == "SUCCEEDED":
-                break
-            if state in ("FAILED", "CANCELLED"):
-                raise RuntimeError(info["Status"].get("StateChangeReason", state))
-            time.sleep(0.6)
-        else:
-            raise RuntimeError("A query do Athena estourou o tempo limite.")
 
-        result = athena.get_query_results(QueryExecutionId=qid, MaxResults=200)
-        raw = [
-            [cell.get("VarCharValue", "") for cell in row["Data"]]
-            for row in result["ResultSet"]["Rows"]
-        ]
-        columns = raw[0] if raw else []
-        rows = raw[1:] if len(raw) > 1 else []
-        stats = info.get("Statistics", {})
-        return {
-            "colunas": columns,
-            "linhas": rows,
-            "query_id": qid,
-            "tempo_ms": int(stats.get("EngineExecutionTimeInMillis", 0)),
-            "bytes_escaneados": int(stats.get("DataScannedInBytes", 0)),
-            "total_ms": int((time.perf_counter() - started) * 1000),
-        }
-    except (NoCredentialsError, ClientError, BotoCoreError) as exc:
-        raise AwsUnavailable(_friendly(exc)) from exc
+def _run_query_once(sql: str, timeout: int, started: float) -> dict:
+    athena = _client("athena")
+    execution = athena.start_query_execution(
+        QueryString=sql.strip().rstrip(";"),
+        QueryExecutionContext={"Database": settings.GLUE_DATABASE},
+        ResultConfiguration={"OutputLocation": settings.ATHENA_OUTPUT},
+        WorkGroup=settings.ATHENA_WORKGROUP,
+    )
+    qid = execution["QueryExecutionId"]
+
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        info = athena.get_query_execution(QueryExecutionId=qid)["QueryExecution"]
+        state = info["Status"]["State"]
+        if state == "SUCCEEDED":
+            break
+        if state in ("FAILED", "CANCELLED"):
+            raise RuntimeError(info["Status"].get("StateChangeReason", state))
+        time.sleep(0.6)
+    else:
+        raise RuntimeError("A query do Athena estourou o tempo limite.")
+
+    result = athena.get_query_results(QueryExecutionId=qid, MaxResults=200)
+    raw = [
+        [cell.get("VarCharValue", "") for cell in row["Data"]]
+        for row in result["ResultSet"]["Rows"]
+    ]
+    columns = raw[0] if raw else []
+    rows = raw[1:] if len(raw) > 1 else []
+    stats = info.get("Statistics", {})
+    return {
+        "colunas": columns,
+        "linhas": rows,
+        "query_id": qid,
+        "tempo_ms": int(stats.get("EngineExecutionTimeInMillis", 0)),
+        "bytes_escaneados": int(stats.get("DataScannedInBytes", 0)),
+        "total_ms": int((time.perf_counter() - started) * 1000),
+    }
+
+
+def drop_table() -> dict:
+    """DROP the Iceberg table so a checkpoint-less restart's initialSync can
+    rebuild it clean instead of appending a duplicate copy on top.
+
+    Used by stream-processing/rebuild_table.py, which is the automated
+    counterpart of the manual `DROP TABLE IF EXISTS ...` step documented in
+    docs/TROUBLESHOOTING.md.
+    """
+    return run_query(
+        f"DROP TABLE IF EXISTS {settings.GLUE_DATABASE}.{settings.ICEBERG_TABLE}"
+    )
 
 
 def table_columns() -> list[dict]:

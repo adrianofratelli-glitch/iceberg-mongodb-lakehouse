@@ -28,6 +28,12 @@ load("stream-processing/restart_processor.js")
 INSERT and DELETE work without this setting, so the demo looks healthy until
 step 2 of the live script.
 
+**Update (2026-09):** `stream-processing/create_processor.js` now checks and
+enables this flag itself before creating the processor, and aborts with a
+clear message if it can't (e.g. insufficient permissions) instead of creating
+a processor that is guaranteed to fail on the first UPDATE. The manual fix
+above (and `POST /api/corrigir/post-images`) still work as a fallback.
+
 ## `Invalid $iceberg.path: cannot end with a '/' character`
 
 `ICEBERG_PATH` must not have a trailing slash. Use `"iceberg-warehouse"`.
@@ -65,6 +71,12 @@ The processor writes rejects to `iceberg_demo.dlq`. Observed causes:
 The last one is the dangerous one: a single document with a dotted field name
 stops the whole pipeline, and it cannot be skipped by the DLQ. Iceberg column
 names are stricter than MongoDB field names.
+
+**Update (2026-09):** `stream-processing/create_processor.js` now adds a
+sanitization stage before `$iceberg` that renames any key containing `.` or
+`$` (recursively, including inside arrays) so a dotted field name no longer
+takes the processor down. The DLQ config below still catches Decimal128 and
+type conflicts, which is a separate failure mode.
 
 Check the queue with:
 
@@ -136,6 +148,14 @@ SELECT count(*) AS total, count(DISTINCT _id) AS distinct_ids FROM orders
 ```
 
 Both numbers must match the MongoDB count.
+
+**Update (2026-09):** `stream-processing/restart_processor.js` now refuses to
+run (`resumeFromCheckpoint: false`) unless `AUTO_REBUILD=1` is set in the
+environment, printing the exact commands otherwise instead of duplicating
+silently. `stream-processing/rebuild_table.py --auto-rebuild` automates the
+`DROP TABLE` step via boto3 (same Athena client pattern as
+`backend/athena_side.py`); without `--auto-rebuild` it also refuses and prints
+the manual command.
 
 ## Columns from old documents stay in the table
 

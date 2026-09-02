@@ -9,11 +9,13 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import FastAPI, HTTPException, Path as ApiPath
+from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 import athena_side
+import lag_side
 import mongo_side
 import settings
 
@@ -94,7 +96,7 @@ def preflight():
 
 
 @app.get("/api/visao-geral")
-def visao_geral():
+async def visao_geral():
     try:
         mongo = mongo_side.overview()
     except Exception as exc:  # noqa: BLE001
@@ -102,7 +104,9 @@ def visao_geral():
 
     iceberg: dict = {"disponivel": False}
     try:
-        iceberg = {"disponivel": True, **athena_side.counts()}
+        # athena_side.counts() polls Athena synchronously (sleep loop); runs
+        # in a worker thread so it doesn't block the event loop.
+        iceberg = {"disponivel": True, **(await run_in_threadpool(athena_side.counts))}
     except athena_side.AwsUnavailable as exc:
         iceberg["erro"] = str(exc)
     except Exception as exc:  # noqa: BLE001
@@ -117,21 +121,22 @@ def visao_geral():
 
 
 @app.get("/api/schema")
-def schema():
+async def schema():
     try:
-        return {"disponivel": True, "colunas": athena_side.table_columns()}
+        colunas = await run_in_threadpool(athena_side.table_columns)
+        return {"disponivel": True, "colunas": colunas}
     except athena_side.AwsUnavailable as exc:
         return {"disponivel": False, "erro": str(exc)}
 
 
 @app.get("/api/pedido/{order_id}")
-def pedido(order_id: OrderId):
+async def pedido(order_id: OrderId):
     doc = mongo_side.find_order(order_id)
     if doc and isinstance(doc.get("orderDate"), object):
         doc = {**doc, "orderDate": str(doc.get("orderDate"))}
     resposta = {"mongo": doc}
     try:
-        resposta["iceberg"] = athena_side.find_order(order_id)
+        resposta["iceberg"] = await run_in_threadpool(athena_side.find_order, order_id)
     except athena_side.AwsUnavailable as exc:
         resposta["iceberg"] = {"erro": str(exc)}
     return resposta
@@ -222,6 +227,21 @@ def demo(operacao: str):
     }
 
 
+@app.get("/api/lag")
+async def lag():
+    """Distância entre o checkpoint do processor e a janela do oplog.
+
+    Dá visibilidade ANTES do processor falhar por checkpoint fora da janela
+    (ver docs/TROUBLESHOOTING.md, "Resume of change stream was not
+    possible") -- hoje isso só é descoberto quando o processor já está
+    FAILED e a recuperação sem duplicar a tabela já não é mais possível.
+    """
+    try:
+        return await run_in_threadpool(lag_side.processor_lag)
+    except lag_side.LagUnavailable as exc:
+        return {"disponivel": False, "erro": str(exc)}
+
+
 @app.post("/api/corrigir/post-images")
 def corrigir_post_images():
     try:
@@ -236,17 +256,18 @@ def corrigir_post_images():
 
 
 @app.get("/api/snapshots")
-def snapshots():
+async def snapshots():
     try:
-        return {"disponivel": True, **athena_side.snapshots()}
+        return {"disponivel": True, **(await run_in_threadpool(athena_side.snapshots))}
     except athena_side.AwsUnavailable as exc:
         return {"disponivel": False, "erro": str(exc)}
 
 
 @app.get("/api/snapshots/{snapshot_id}/pedido/{order_id}")
-def pedido_no_snapshot(snapshot_id: SnapshotId, order_id: OrderId):
+async def pedido_no_snapshot(snapshot_id: SnapshotId, order_id: OrderId):
     try:
-        return {"disponivel": True, **athena_side.order_at_snapshot(order_id, snapshot_id)}
+        dados = await run_in_threadpool(athena_side.order_at_snapshot, order_id, snapshot_id)
+        return {"disponivel": True, **dados}
     except athena_side.AwsUnavailable as exc:
         return {"disponivel": False, "erro": str(exc)}
     except ValueError as exc:
@@ -271,7 +292,7 @@ def _titulo(path: Path) -> str:
 
 
 @app.post("/api/consultas/{consulta_id}")
-def rodar_consulta(consulta_id: QueryId):
+async def rodar_consulta(consulta_id: QueryId):
     caminho = SQL_DIR / f"{consulta_id}.sql"
     if not caminho.exists() or caminho.parent != SQL_DIR:
         raise HTTPException(status_code=404, detail="Consulta desconhecida.")
@@ -283,7 +304,8 @@ def rodar_consulta(consulta_id: QueryId):
     if not sql:
         raise HTTPException(status_code=400, detail="A consulta está vazia.")
     try:
-        return {"disponivel": True, "sql": sql, **athena_side.run_query(sql)}
+        resultado = await run_in_threadpool(athena_side.run_query, sql)
+        return {"disponivel": True, "sql": sql, **resultado}
     except athena_side.AwsUnavailable as exc:
         return {"disponivel": False, "sql": sql, "erro": str(exc)}
     except Exception as exc:  # noqa: BLE001
