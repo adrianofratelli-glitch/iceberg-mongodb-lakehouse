@@ -170,7 +170,56 @@ def demo(operacao: str):
         "schema": "Pedido com campo novo. O Iceberg evolui o schema sozinho.",
         "reset": "Documentos da demo removidos.",
     }
-    return {"operacao": operacao, "documento": resultado, "mensagem": mensagens[operacao]}
+    ids = {
+        "insert": settings.LIVE_ORDER_ID,
+        "update": settings.LIVE_ORDER_ID,
+        "delete": settings.LIVE_ORDER_ID,
+        "schema": settings.SCHEMA_ORDER_ID,
+    }
+    calls = {
+        "insert": [
+            {"deleteOne": {"filter": {"_id": settings.LIVE_ORDER_ID}}},
+            {"insertOne": {"document": resultado}},
+        ],
+        "update": [
+            {
+                "updateOne": {
+                    "filter": {"_id": settings.LIVE_ORDER_ID},
+                    "update": {"$set": {"status": "EM_TRANSPORTE", "amount": 2159.10}},
+                }
+            },
+            {"findOne": {"filter": {"_id": settings.LIVE_ORDER_ID}}},
+        ],
+        "delete": [{"deleteOne": {"filter": {"_id": settings.LIVE_ORDER_ID}}}],
+        "schema": [
+            {"deleteOne": {"filter": {"_id": settings.SCHEMA_ORDER_ID}}},
+            {"insertOne": {"document": resultado}},
+        ],
+        "reset": [
+            {
+                "deleteMany": {
+                    "filter": {
+                        "_id": {"$in": [settings.LIVE_ORDER_ID, settings.SCHEMA_ORDER_ID]}
+                    }
+                }
+            }
+        ],
+    }
+    return {
+        "operacao": operacao,
+        "documento": resultado,
+        "mensagem": mensagens[operacao],
+        "query_details": {
+            "operation": operacao,
+            "namespace": f"{settings.DATABASE_NAME}.{settings.COLLECTION_NAME}",
+            "query": calls[operacao],
+            "explain": (
+                "Busca pela chave _id; o índice único nativo cobre as operações de demonstração."
+                if operacao in ids
+                else "Remoção por conjunto de chaves _id; o índice único nativo é suficiente."
+            ),
+        },
+    }
 
 
 @app.post("/api/corrigir/post-images")

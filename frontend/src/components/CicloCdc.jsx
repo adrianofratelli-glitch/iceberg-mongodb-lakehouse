@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { api } from '../api'
 import AvisoAws from './AvisoAws'
+import QueryDetails from './QueryDetails'
 
 const PASSOS = [
   { op: 'insert', rotulo: 'INSERT', descricao: 'Pedido novo entra pelo caminho transacional.' },
@@ -20,6 +21,7 @@ export default function CicloCdc({ aoMudar }) {
   const [iceberg, setIceberg] = useState(null)
   const [decorrido, setDecorrido] = useState(null)
   const [propagou, setPropagou] = useState(null)
+  const [queryDetails, setQueryDetails] = useState(null)
   const cancelar = useRef(false)
 
   useEffect(() => () => { cancelar.current = true }, [])
@@ -67,6 +69,7 @@ export default function CicloCdc({ aoMudar }) {
       const resposta = await api.demo(op)
       setMensagem(resposta.mensagem)
       setMongo(resposta.documento)
+      setQueryDetails(resposta.query_details)
       aoMudar?.()
       await esperarPropagacao(op)
     } catch (e) {
@@ -85,6 +88,7 @@ export default function CicloCdc({ aoMudar }) {
       setIceberg(null)
       setPropagou(null)
       setDecorrido(null)
+      setQueryDetails(r.query_details)
       aoMudar?.()
     } catch (e) {
       setErro(e.message)
@@ -114,6 +118,14 @@ export default function CicloCdc({ aoMudar }) {
 
       {mensagem && !erro && <div className="notice ok">{mensagem}</div>}
       {erro && <div className="notice bad"><strong>Falhou.</strong> {erro}</div>}
+      {queryDetails && (
+        <QueryDetails
+          operation={queryDetails.operation}
+          namespace={queryDetails.namespace}
+          query={queryDetails.query}
+          explain={queryDetails.explain}
+        />
+      )}
 
       {(mongo || iceberg) && (
         <div className="timeline">

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { api, fmtBytes } from '../api'
 import AvisoAws from './AvisoAws'
 import Tabela from './Tabela'
+import QueryDetails from './QueryDetails'
 
 export default function Consultas() {
   const [lista, setLista] = useState([])
@@ -56,6 +57,18 @@ export default function Consultas() {
             {' '}sem nenhum impacto no cluster operacional
           </p>
         </>
+      )}
+      {resultado?.sql && (
+        <QueryDetails
+          operation="Athena StartQueryExecution"
+          namespace="Iceberg catalog"
+          query={resultado.sql}
+          explain={{
+            tempo_ms: resultado.tempo_ms,
+            bytes_escaneados: resultado.bytes_escaneados,
+            observacao: 'A métrica de bytes escaneados é o sinal de custo relevante no Athena.',
+          }}
+        />
       )}
     </>
   )
