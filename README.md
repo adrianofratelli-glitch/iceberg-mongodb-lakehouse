@@ -149,3 +149,7 @@ front:
 Based on [mongodb-developer/Iceberg-MongoDB-Demo](https://github.com/mongodb-developer/Iceberg-MongoDB-Demo),
 hardened against a live environment: credentials moved to `.env`, a dead-letter
 queue, a preflight script, the business and time travel queries, and a UI.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
