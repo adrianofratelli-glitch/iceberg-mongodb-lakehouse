@@ -1,23 +1,23 @@
 :root {
-  --bg-primary: #001e2b;
-  --bg-secondary: #112733;
-  --bg-card: #1c2d38;
-  --border-subtle: #3d4f58;
+  --bg-primary: #061621;
+  --bg-secondary: #001e2b;
+  --bg-card: #0a2633;
+  --border-subtle: #2a424d;
 
-  --text-pri: #e8edeb;
-  --text-sec: #c1c7c6;
-  --text-muted: #889397;
+  --text-pri: #fdfff5;
+  --text-sec: #cdd5ce;
+  --text-muted: #9ea2a1;
 
   --accent: #00ed64;
-  --link: #0498ec;
-  --warning: #ffc010;
+  --link: #3d9dff;
+  --warning: #ffad00;
   --danger: #ff6960;
 
   --lake: #7f9ba8; /* acento de domínio: a metade "lake" do circuito */
 
   --radius: 14px;
-  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  --sans: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono: 'Source Code Pro', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: 'Special Gothic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -77,7 +77,9 @@ main { padding: 0 clamp(16px, 4vw, 40px) 96px; max-width: 1240px; margin: 0 auto
 
 /* ---------- hero ---------- */
 
-.hero { padding: clamp(40px, 7vw, 76px) 0 clamp(28px, 4vw, 44px); max-width: 780px; }
+.hero { padding: clamp(40px, 7vw, 76px) 0 clamp(28px, 4vw, 44px); }
+.hero > * { max-width: min(780px, 62%); }
+@media (max-width: 720px) { .hero > * { max-width: none; } }
 .hero .eyebrow {
   font-family: var(--mono);
   font-size: 0.76rem;
@@ -140,7 +142,7 @@ button {
 button:hover:not(:disabled) { border-color: var(--accent); }
 button:active:not(:disabled) { transform: translateY(1px); }
 button:disabled { opacity: 0.45; cursor: not-allowed; }
-button.primary { background: var(--accent); color: #001e2b; border-color: var(--accent); }
+button.primary { background: var(--accent); color: #061621; border-color: var(--accent); }
 button.primary:hover:not(:disabled) { background: #00c853; }
 button.ghost { background: transparent; }
 button.tiny { min-height: 32px; padding: 0 12px; font-size: 0.8rem; font-weight: 400; }
