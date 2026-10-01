@@ -25,6 +25,21 @@ export default function App() {
 
   const mongo = visao?.mongo
   const iceberg = visao?.iceberg
+
+  // Credencial AWS expira entre demos. Enquanto o lado Iceberg estiver fora,
+  // reconsulta sozinho a cada 8 s (aba visível): ao colar um bloco novo em
+  // ~/.aws/credentials a PoV volta sem reiniciar nem recarregar a página.
+  const icebergFora = Boolean(visao) && iceberg?.disponivel === false
+  useEffect(() => {
+    if (!icebergFora) return undefined
+    const id = setInterval(() => {
+      if (document.visibilityState !== 'visible') return
+      carregar()
+      api.preflight().then(setPreflight).catch(() => {})
+      api.lag().then(setLag).catch(() => {})
+    }, 8000)
+    return () => clearInterval(id)
+  }, [icebergFora, carregar])
   const aws = preflight?.checks?.find((c) => c.item === 'Credencial AWS')
   const postImages = preflight?.checks?.find((c) => c.item === 'changeStreamPreAndPostImages')
 

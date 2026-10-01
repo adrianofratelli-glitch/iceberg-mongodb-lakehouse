@@ -19,7 +19,11 @@ class AwsUnavailable(RuntimeError):
 
 
 def _client(service: str):
-    return boto3.client(service, region_name=settings.AWS_REGION)
+    # Sessão nova a cada chamada: o boto3.client() do módulo reutiliza a sessão
+    # padrão, que guarda a credencial lida na primeira vez. Com sessão nova, um
+    # bloco colado em ~/.aws/credentials (ou um `aws sso login`) vale na próxima
+    # requisição, sem reiniciar a PoV.
+    return boto3.session.Session(region_name=settings.AWS_REGION).client(service)
 
 
 def identity() -> dict:

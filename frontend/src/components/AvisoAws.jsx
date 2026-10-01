@@ -7,7 +7,7 @@ export default function AvisoAws({ erro }) {
       {erro}
       {expirada && (
         <>
-          {' '}Cole um bloco novo do portal SSO em <code>~/.aws/credentials</code> e recarregue.
+          {' '}Cole um bloco novo do portal SSO em <code>~/.aws/credentials</code> A PoV se recupera sozinha em alguns segundos.
           O lado MongoDB continua funcionando.
         </>
       )}
