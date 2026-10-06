@@ -11,8 +11,10 @@ own — including the two a traditional append-only lake struggles with.
 
 > MongoDB Atlas → Atlas Stream Processing → Iceberg on S3 → Glue → Athena
 
-Measured against a real cluster and a real bucket: **5,000 orders on both sides,
-inserts visible in ~10s, updates in ~20s, deletes in 30-60s.**
+Measured against a real cluster and a real bucket (2026-08-24): **5,000 orders
+on both sides, inserts visible in ~10s, updates in ~20s, deletes in 30-60s.**
+
+![Architecture: Atlas cluster, Atlas Stream Processing, Iceberg on S3, Glue and Athena](docs/architecture.png)
 
 ---
 
@@ -79,7 +81,8 @@ cp .env.example .env    # fill in MONGODB_URI, S3_BUCKET, AWS_REGION
 # 3. python
 python3 -m venv .venv && ./.venv/bin/pip install -r requirements.txt
 ./.venv/bin/python scripts/preflight.py     # validates and fixes the MongoDB side
-./.venv/bin/python scripts/seed_orders.py   # 5,000 reproducible orders
+DATABASE_NAME=iceberg_demo_test ./.venv/bin/python scripts/reset_demo.py   # try it on a test db first
+ALLOW_DEMO_DB_WRITE=1 ./.venv/bin/python scripts/reset_demo.py          # 5,000 reproducible orders in the demo db
 
 # 4. the stream processor, from mongosh connected to the workspace
 #    edit the constants at the top of the file first
@@ -104,23 +107,72 @@ working and the UI says what is missing.
 ./.venv/bin/python scripts/update_order.py
 ./.venv/bin/python scripts/delete_order.py
 ./.venv/bin/python scripts/add_schema_field.py
-./.venv/bin/python scripts/reset_demo.py
+ALLOW_DEMO_DB_WRITE=1 ./.venv/bin/python scripts/reset_demo.py
 ./.venv/bin/python scripts/compare_aggregation.py   # same aggregation on the cluster, timed
 ```
 
 Athena queries live in `sql/`, from per-step validation to the business question
 and the time travel snippets.
 
+## Resetting the demo
+
+`scripts/reset_demo.py` is the one command that puts everything back: it makes
+sure the collection has `changeStreamPreAndPostImages`, removes the live demo
+orders and anything that is not part of the seed, upserts the 5,000 seeded
+orders and empties the dead-letter queue. It is idempotent: on a clean demo it
+writes nothing that changes a document, so the processor has nothing to carry.
+
+- Any database ending in `_test` is writable; the demo database needs
+  `ALLOW_DEMO_DB_WRITE=1`. `DATABASE_NAME` in the environment wins over `.env`.
+- The seed is anchored on a fixed date (`SEED_ANCHOR`, default
+  `2026-08-24T18:59:04Z`) because the `_id` carries the order month. Set
+  `SEED_ANCHOR` to refresh the dates, then run the reset so the old ids go.
+- The Iceberg table is not touched: the reset is plain writes and the processor
+  propagates them, deletes included. Rebuilding the table from scratch is the
+  separate, destructive path in `docs/TROUBLESHOOTING.md`
+  (`stream-processing/rebuild_table.py --auto-rebuild`, then
+  `restart_processor.js`).
+
+## Measuring the change-stream leg
+
+```bash
+./.venv/bin/python scripts/cdc_probe.py --samples 30   # runs in iceberg_demo_test only
+```
+
+It times write → change event (with post-image, as the processor uses) for
+insert, update and delete, checks that a consumer resumed from its token on a
+new connection gets exactly the events it missed, and that concurrent writers
+produce events in commit order. It does not include the `$iceberg` commit or
+Athena; the UI's CDC panel times that end to end.
+
+Run on 2026-10-06 from a laptop to the Atlas cluster (includes the write
+round trip): p50 419 ms / p95 445 ms for insert, 418 / 460 ms for update,
+425 / 447 ms for delete (30 samples each); resume delivered 30/30 missed
+events with 0 duplicates; 100 concurrent updates arrived in order.
+
 ## Adversarial tests
 
 ```bash
 backend/venv/bin/pip install -r backend/requirements-dev.txt
-backend/venv/bin/pytest -q backend/tests
+backend/venv/bin/pytest -q backend/tests                 # offline, mocks only
+LIVE_ATLAS=1 backend/venv/bin/pytest -q backend/tests/test_live_cdc_adversarial.py   # Atlas, iceberg_demo_test
+cd frontend && node --test tests/*.test.mjs
 ```
 
 The suite rejects malformed or oversized order IDs, SQL-like snapshot values and
 query traversal before MongoDB, Athena or the filesystem is touched. Snapshot IDs
-are positive bounded integers; order and query IDs use an explicit allowlist.
+are positive bounded integers; order and query IDs use an explicit allowlist
+(zero-width, RTL, emoji and 60 KB identifiers included). Error text that reaches
+the browser has connection strings, cluster hosts and AWS ids masked.
+
+The live suite runs against `iceberg_demo_test` and drops what it creates:
+eight concurrent INSERT clicks leave one document, schema drift (`amount` as
+string, `Decimal128`, null, a new field) does not break the overview, unicode
+and dotted keys arrive verbatim in the change stream, and a 10 MB document is
+served. It also pins a real limit: updating a ~9 MB field of a ~10 MB document
+produces a change event above 16 MB that a plain change stream cannot deliver
+(`$changeStreamSplitLargeEvent` splits it). Keep documents well below that if
+they are going to the lake.
 
 ## Before every demo
 

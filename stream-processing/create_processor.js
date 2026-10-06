@@ -17,7 +17,7 @@ const SOURCE_COLLECTION = "orders";
 // Defaults to the MONGODB_URI env var (same one used by backend/.env) so
 // mongosh sessions started with that variable already set need no edit here.
 const SOURCE_URI = (typeof process !== "undefined" && process.env && process.env.MONGODB_URI) ||
-  "REPLACE-ME-mongodb+srv://user:pass@cluster.mongodb.net/";
+  "mongodb+srv://<user>:<password>@<cluster>.mongodb.net/";
 
 const S3_CONNECTION = "s3-iceberg";
 const S3_BUCKET = "REPLACE-ME-seu-bucket";
@@ -46,7 +46,7 @@ const DLQ_COLL = "dlq";
 
 print(`Checking changeStreamPreAndPostImages on ${SOURCE_DATABASE}.${SOURCE_COLLECTION}...`);
 
-if (SOURCE_URI.startsWith("REPLACE-ME")) {
+if (SOURCE_URI.includes("<user>") || SOURCE_URI.includes("<password>")) {
   print("ABORT: SOURCE_URI not configured. Set MONGODB_URI in the environment " +
     "(same value as backend/.env) or edit SOURCE_URI at the top of this file.");
   quit(1);

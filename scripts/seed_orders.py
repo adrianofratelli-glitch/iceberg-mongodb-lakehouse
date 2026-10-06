@@ -9,15 +9,33 @@ catalog -- only the values are Brazilian. Amounts are BRL, stored as double:
 Decimal128 is rejected by $iceberg and lands in the DLQ.
 """
 
+import os
 import random
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 
-from pymongo import ReplaceOne, UpdateOne
-from common import get_collection, utcnow
+from pymongo import ReplaceOne
+from common import assert_safe_target, get_collection
+
 
 SEED_COUNT = 5000
 BATCH = 1000
 RANDOM_SEED = 42
+
+# Fixed reference instant. The _id embeds the order month (PED-YYYYMM-NNNNNN),
+# so anchoring on "now" made every run in a new month write 5,000 NEW ids on
+# top of the old ones (10,000 documents, Iceberg diverging from the screenshots).
+# This is the instant the demo dataset was first generated; override with
+# SEED_ANCHOR=<ISO-8601 UTC> only when you deliberately want fresher dates
+# (run scripts/reset_demo.py afterwards so the old ids are removed).
+DEFAULT_ANCHOR = datetime(2026, 8, 24, 18, 59, 4, 280000, tzinfo=timezone.utc)
+
+
+def seed_anchor() -> datetime:
+    raw = os.getenv("SEED_ANCHOR", "").strip()
+    if not raw:
+        return DEFAULT_ANCHOR
+    value = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
 
 # (produto, preço unitário em BRL)
 PRODUCTS = [
@@ -59,8 +77,8 @@ def weighted(pairs, rng):
     return rng.choices(population, weights=weights, k=1)[0]
 
 
-def build_orders(rng):
-    now = utcnow()
+def build_orders(rng, now: datetime | None = None):
+    now = now or seed_anchor()
     for i in range(1, SEED_COUNT + 1):
         product, unit_price = rng.choice(PRODUCTS)
         quantity = rng.choices([1, 2, 3, 4], weights=[70, 20, 7, 3], k=1)[0]
@@ -85,23 +103,33 @@ def build_orders(rng):
         }
 
 
-def main():
+def seed_ids() -> set[str]:
+    return {doc["_id"] for doc in build_orders(random.Random(RANDOM_SEED))}
+
+
+def seed(coll) -> int:
+    """Upsert the SEED_COUNT deterministic orders. Returns how many were written."""
     rng = random.Random(RANDOM_SEED)
-    client, coll = get_collection()
-    try:
-        ops, written = [], 0
-        for doc in build_orders(rng):
-            ops.append(ReplaceOne({"_id": doc["_id"]}, doc, upsert=True))
-            if len(ops) == BATCH:
-                coll.bulk_write(ops, ordered=False)
-                written += len(ops)
-                print(f"  {written}/{SEED_COUNT}")
-                ops = []
-        if ops:
+    ops, written = [], 0
+    for doc in build_orders(rng):
+        ops.append(ReplaceOne({"_id": doc["_id"]}, doc, upsert=True))
+        if len(ops) == BATCH:
             coll.bulk_write(ops, ordered=False)
             written += len(ops)
             print(f"  {written}/{SEED_COUNT}")
+            ops = []
+    if ops:
+        coll.bulk_write(ops, ordered=False)
+        written += len(ops)
+        print(f"  {written}/{SEED_COUNT}")
+    return written
 
+
+def main():
+    assert_safe_target()
+    client, coll = get_collection()
+    try:
+        written = seed(coll)
         total = coll.count_documents({})
         print(f"\nSeed complete: {written} orders written, {total} in {coll.full_name}")
     finally:

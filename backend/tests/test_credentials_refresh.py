@@ -24,7 +24,7 @@ def test_new_credentials_file_is_picked_up_without_restart(monkeypatch, tmp_path
     assert "ausente" in first["erro"]
 
     creds.write_text(
-        "[default]\naws_access_key_id=AKIAFAKEFAKEFAKEFAKE\n"
+        "[default]\naws_access_key_id=AKIAIOSFODNN7EXAMPLE\n"
         "aws_secret_access_key=fakefakefakefakefakefakefakefakefakefake\n"
     )
     second = athena_side.identity()

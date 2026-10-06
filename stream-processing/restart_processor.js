@@ -10,7 +10,7 @@
 // restarts produced four copies of all 12 documents (48 rows).
 //
 // Because that duplication is real and has already happened once in
-// production (spi-inter-pix, 2026-09-01), this script now REFUSES to run
+// a shared workspace (2026-09-01), this script now REFUSES to run
 // unless it has been told the table was already rebuilt:
 //
 //   RECOMMENDED (automated):

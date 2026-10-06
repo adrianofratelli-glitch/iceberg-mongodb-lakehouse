@@ -78,8 +78,12 @@ Message: **The document model changed without rebuilding an ETL schema mapping.*
 ## Cleanup
 
 ```bash
-python scripts/reset_demo.py
+ALLOW_DEMO_DB_WRITE=1 ./.venv/bin/python scripts/reset_demo.py
 ```
+
+Removes the live orders and any stray document, re-upserts the 5,000 seeded
+orders and empties the DLQ. Without the variable it refuses the demo database;
+any `*_test` database is always allowed.
 
 If you want to stop the processor:
 

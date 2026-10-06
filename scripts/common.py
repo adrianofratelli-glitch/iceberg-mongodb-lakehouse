@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from datetime import datetime, timezone
@@ -36,6 +37,23 @@ def validate_config() -> None:
             "MONGODB_URI still contains placeholders from .env.example.\n"
             "Edit .env and set the real connection string."
         )
+
+
+def assert_safe_target(db_name: str | None = None) -> None:
+    """Refuse to write to the demo database unless explicitly allowed.
+
+    Any database ending in ``_test`` is always writable. Anything else (the
+    demo's ``iceberg_demo``) needs ALLOW_DEMO_DB_WRITE=1, so a test run with a
+    forgotten DATABASE_NAME override can never rewrite what the audience sees.
+    """
+    name = db_name or DATABASE_NAME
+    if name.endswith("_test") or os.getenv("ALLOW_DEMO_DB_WRITE") == "1":
+        return
+    raise SystemExit(
+        f"Refusing to write to '{name}' (the demo database).\n"
+        "Use DATABASE_NAME=<name>_test for tests, or set ALLOW_DEMO_DB_WRITE=1 "
+        "to reset the demo on purpose."
+    )
 
 
 def get_collection():

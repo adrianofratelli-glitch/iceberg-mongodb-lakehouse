@@ -21,6 +21,7 @@ export default function CicloCdc({ aoMudar }) {
   const [iceberg, setIceberg] = useState(null)
   const [decorrido, setDecorrido] = useState(null)
   const [propagou, setPropagou] = useState(null)
+  const [esgotou, setEsgotou] = useState(false)
   const [queryDetails, setQueryDetails] = useState(null)
   const cancelar = useRef(false)
 
@@ -28,12 +29,15 @@ export default function CicloCdc({ aoMudar }) {
 
   const alvo = (op) => (op === 'schema' ? PEDIDO_SCHEMA : PEDIDO)
 
+  const LIMITE_TENTATIVAS = 40
+  const INTERVALO_MS = 3000
+
   const esperarPropagacao = async (op) => {
     const inicio = Date.now()
     const esperado = op === 'delete' ? 0 : 1
-    for (let tentativa = 0; tentativa < 40; tentativa += 1) {
+    for (let tentativa = 0; tentativa < LIMITE_TENTATIVAS; tentativa += 1) {
       if (cancelar.current) return
-      await new Promise((r) => setTimeout(r, 3000))
+      await new Promise((r) => setTimeout(r, INTERVALO_MS))
       setDecorrido(Math.round((Date.now() - inicio) / 1000))
       try {
         const dados = await api.pedido(alvo(op))
@@ -57,12 +61,14 @@ export default function CicloCdc({ aoMudar }) {
       }
     }
     setPropagou(null)
+    setEsgotou(true)
   }
 
   const executar = async (op) => {
     setOcupado(op)
     setErro(null)
     setPropagou(null)
+    setEsgotou(false)
     setDecorrido(0)
     setIceberg(null)
     try {
@@ -87,6 +93,7 @@ export default function CicloCdc({ aoMudar }) {
       setMongo(null)
       setIceberg(null)
       setPropagou(null)
+      setEsgotou(false)
       setDecorrido(null)
       setQueryDetails(r.query_details)
       aoMudar?.()
@@ -139,12 +146,14 @@ export default function CicloCdc({ aoMudar }) {
           </div>
           <div className={`step ${propagou !== null ? 'done' : 'wait'}`}>
             <span className="badge">ICEBERG</span>
-            <span>
+            <span role="status">
               {iceberg?.erro
                 ? 'indisponível'
                 : propagou !== null
                   ? `refletido em ${propagou}s`
-                  : `aguardando propagação… ${decorrido ?? 0}s`}
+                  : esgotou
+                    ? `não refletiu em ${decorrido ?? 0}s — veja o estado do processor e a DLQ no preflight`
+                    : `aguardando propagação… ${decorrido ?? 0}s`}
             </span>
           </div>
         </div>

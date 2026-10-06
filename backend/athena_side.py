@@ -38,7 +38,15 @@ def _friendly(exc: Exception) -> str:
     text = str(exc)
     if isinstance(exc, NoCredentialsError) or "NoCredentials" in text:
         return "Credencial AWS ausente ou expirada. Cole um bloco novo em ~/.aws/credentials."
-    if "ExpiredToken" in text or "InvalidClientTokenId" in text:
+    if any(
+        marker in text
+        for marker in (
+            "ExpiredToken",
+            "InvalidClientTokenId",
+            "UnrecognizedClientException",
+            "security token included in the request is invalid",
+        )
+    ):
         return "Credencial AWS expirada. Cole um bloco novo em ~/.aws/credentials."
     if "AccessDenied" in text:
         return f"Acesso negado pela policy IAM: {text[:200]}"
@@ -90,13 +98,17 @@ def run_query(sql: str, timeout: int = 60, retries: int = 3) -> dict:
 
 def _run_query_once(sql: str, timeout: int, started: float, request_token: str | None = None) -> dict:
     athena = _client("athena")
-    execution = athena.start_query_execution(
-        ClientRequestToken=request_token or uuid.uuid4().hex,
-        QueryString=sql.strip().rstrip(";"),
-        QueryExecutionContext={"Database": settings.GLUE_DATABASE},
-        ResultConfiguration={"OutputLocation": settings.ATHENA_OUTPUT},
-        WorkGroup=settings.ATHENA_WORKGROUP,
-    )
+    params = {
+        "ClientRequestToken": request_token or uuid.uuid4().hex,
+        "QueryString": sql.strip().rstrip(";"),
+        "QueryExecutionContext": {"Database": settings.GLUE_DATABASE},
+        "WorkGroup": settings.ATHENA_WORKGROUP,
+    }
+    # Without S3_BUCKET/ATHENA_OUTPUT, fall back to the workgroup's own result
+    # location instead of sending an empty OutputLocation Athena rejects.
+    if settings.ATHENA_OUTPUT:
+        params["ResultConfiguration"] = {"OutputLocation": settings.ATHENA_OUTPUT}
+    execution = athena.start_query_execution(**params)
     qid = execution["QueryExecutionId"]
 
     deadline = time.monotonic() + timeout
