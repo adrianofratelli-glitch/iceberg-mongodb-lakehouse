@@ -195,3 +195,14 @@ def test_reset_removes_strays_and_live_docs_then_reseeds(scripts_env):
     assert any("$nin" in f["_id"] for f in filters)
     assert coll.bulk_write.call_count == 5  # 5,000 upserts in batches of 1,000
 
+
+
+def test_invalid_session_token_reads_as_expired_credential():
+    from botocore.exceptions import ClientError
+
+    exc = ClientError(
+        {"Error": {"Code": "UnrecognizedClientException",
+                   "Message": "The security token included in the request is invalid"}},
+        "StartQueryExecution",
+    )
+    assert "expirada" in main.athena_side._friendly(exc)

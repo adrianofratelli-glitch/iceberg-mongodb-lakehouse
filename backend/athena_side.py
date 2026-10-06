@@ -38,7 +38,15 @@ def _friendly(exc: Exception) -> str:
     text = str(exc)
     if isinstance(exc, NoCredentialsError) or "NoCredentials" in text:
         return "Credencial AWS ausente ou expirada. Cole um bloco novo em ~/.aws/credentials."
-    if "ExpiredToken" in text or "InvalidClientTokenId" in text:
+    if any(
+        marker in text
+        for marker in (
+            "ExpiredToken",
+            "InvalidClientTokenId",
+            "UnrecognizedClientException",
+            "security token included in the request is invalid",
+        )
+    ):
         return "Credencial AWS expirada. Cole um bloco novo em ~/.aws/credentials."
     if "AccessDenied" in text:
         return f"Acesso negado pela policy IAM: {text[:200]}"
