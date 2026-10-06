@@ -73,7 +73,18 @@ def overview() -> dict:
                     {
                         "$group": {
                             "_id": None,
-                            "receita": {"$sum": "$amount"},
+                            # Schema drift (amount as string/Decimal128) must not
+                            # take the overview down: coerce, drop what can't be.
+                            "receita": {
+                                "$sum": {
+                                    "$convert": {
+                                        "input": "$amount",
+                                        "to": "double",
+                                        "onError": 0,
+                                        "onNull": 0,
+                                    }
+                                }
+                            },
                             "primeiro": {"$min": "$orderDate"},
                             "ultimo": {"$max": "$orderDate"},
                         }
@@ -85,7 +96,7 @@ def overview() -> dict:
     )
     return {
         "total": total,
-        "receita": round(totals.get("receita", 0), 2),
+        "receita": round(float(totals.get("receita") or 0), 2),
         "primeiro_pedido": totals.get("primeiro"),
         "ultimo_pedido": totals.get("ultimo"),
         "por_status": [{"status": r["_id"], "pedidos": r["n"]} for r in by_status],
@@ -100,8 +111,9 @@ def find_order(order_id: str) -> dict | None:
 # --- as quatro operações da demo -------------------------------------------
 
 def demo_insert() -> dict:
-    coll = collection()
-    coll.delete_one({"_id": settings.LIVE_ORDER_ID})
+    # replace_one(upsert) instead of delete+insert: two clicks in a row (or two
+    # tabs) used to race into DuplicateKeyError. Same change event downstream:
+    # insert when absent, replace (full document) when present.
     doc = {
         "_id": settings.LIVE_ORDER_ID,
         "customerId": "CLI-00042",
@@ -114,7 +126,7 @@ def demo_insert() -> dict:
         "paymentMethod": "PIX",
         "orderDate": utcnow(),
     }
-    coll.insert_one(doc)
+    collection().replace_one({"_id": doc["_id"]}, doc, upsert=True)
     return doc
 
 
@@ -134,8 +146,6 @@ def demo_delete() -> dict:
 
 
 def demo_schema_field() -> dict:
-    coll = collection()
-    coll.delete_one({"_id": settings.SCHEMA_ORDER_ID})
     doc = {
         "_id": settings.SCHEMA_ORDER_ID,
         "customerId": "CLI-00999",
@@ -149,7 +159,7 @@ def demo_schema_field() -> dict:
         "fraudScore": 0.92,
         "orderDate": utcnow(),
     }
-    coll.insert_one(doc)
+    collection().replace_one({"_id": doc["_id"]}, doc, upsert=True)
     return doc
 
 
