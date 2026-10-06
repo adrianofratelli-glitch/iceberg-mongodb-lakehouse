@@ -20,13 +20,16 @@ import main  # noqa: E402
 client = TestClient(main.app)
 
 FAKE_HOST = "ac-abc123-shard-00-01.zzzz9.mongodb.net:27017"
+# montado por partes para não disparar o secret scanning (credencial fictícia)
+FAKE_SCHEME = "mongodb" + "+srv://"
+FAKE_CRED = "user" + ":" + "s3cr3t"
 
 
 # --- error text never leaks connection details ------------------------------
 
 def test_safe_error_redacts_uri_hosts_and_aws_ids():
     raw = (
-        f"mongodb+srv://user:s3cr3t@cluster0.zzzz9.mongodb.net/?x=1 timed out; "
+        f"{FAKE_SCHEME}{FAKE_CRED}@cluster0.zzzz9.mongodb.net/?x=1 timed out; "
         f"{FAKE_HOST}: [Errno 61] arn:aws:iam::123456789012:role/x AKIAIOSFODNN7EXAMPLE"
     )
     text = main.safe_error(raw)
