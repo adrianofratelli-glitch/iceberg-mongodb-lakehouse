@@ -65,12 +65,18 @@ botão "Limpar" (reset). Cada clique:
    chamando `GET /api/pedido/{id}` até o lado Iceberg refletir a mudança
    esperada (linha existir/sumir, status bater no caso de update).
 4. Mostra uma timeline com dois passos — "MONGODB" (concluído) e "ICEBERG"
-   (aguardando… Xs / refletido em Xs).
+   (aguardando… Xs / refletido em Xs). Se as 40 tentativas acabarem sem a
+   mudança aparecer, o passo diz "não refletiu em Xs — veja o estado do
+   processor e a DLQ no preflight", em vez de ficar em "aguardando" para
+   sempre.
 5. Renderiza a linha da tabela Iceberg retornada, ou "0 linhas — o delete
    propagou" quando aplicável.
 
 Se o Iceberg responder erro (ex.: credencial AWS), mostra `AvisoAws` em vez
-da tabela.
+da tabela. UPDATE antes do INSERT (ou depois do DELETE) devolve 409 e a UI
+mostra "O pedido não existe. Rode o INSERT primeiro.". Mensagens de erro que
+chegam à UI passam por `safe_error` (`backend/main.py`): URI, host do cluster
+e identificadores AWS são mascarados.
 
 Screenshots:
 - `docs/screenshots/02-ciclo-cdc.png` — INSERT: pedido em MongoDB e a mesma

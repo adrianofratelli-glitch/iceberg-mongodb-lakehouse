@@ -64,14 +64,21 @@ status).
 Por que existe: dar contexto de negócio ao lado operacional na tela
 principal, sem precisar de uma segunda ida ao banco por status.
 
-### `backend/mongo_side.py:70-84` — totais de receita e janela de datas
+### `backend/mongo_side.py` (`overview`) — totais de receita e janela de datas
 ```python
 coll.aggregate(
     [
         {
             "$group": {
                 "_id": None,
-                "receita": {"$sum": "$amount"},
+                "receita": {
+                    "$sum": {
+                        "$convert": {
+                            "input": "$amount", "to": "double",
+                            "onError": 0, "onNull": 0,
+                        }
+                    }
+                },
                 "primeiro": {"$min": "$orderDate"},
                 "ultimo": {"$max": "$orderDate"},
             }
@@ -80,7 +87,9 @@ coll.aggregate(
 )
 ```
 O que faz: soma `amount` de toda a coleção e pega a data do primeiro e do
-último pedido.
+último pedido. O `$convert` existe por schema drift: um `amount` gravado como
+string ou `Decimal128` (que o `$iceberg` manda para a DLQ) derrubava a visão
+geral com `TypeError`; agora é convertido, e o que não converte conta como 0.
 Onde é usado: mesma rota `GET /api/visao-geral`.
 Por que existe: mostrar receita total do lado MongoDB ao lado da receita
 equivalente calculada via Athena — parte do argumento "os dois lados
@@ -116,6 +125,28 @@ custa CPU/IO do cluster transacional no MongoDB (`totalDocsExamined` alto,
 sem índice que ajude) e custa zero no Iceberg via Athena. O script chama
 `explain` em seguida (linha 47-53) para capturar `executionStats` e imprimir
 quantos documentos foram examinados.
+
+## Escritas da demo — MongoDB
+
+### `backend/mongo_side.py` (`demo_insert`, `demo_schema_field`)
+```python
+collection().replace_one({"_id": doc["_id"]}, doc, upsert=True)
+```
+`replaceOne` com `upsert` no lugar do antigo `deleteOne` + `insertOne`: dois
+cliques seguidos (ou duas abas) corriam para `DuplicateKeyError`. O evento a
+jusante continua certo para o modo `cdc` do `$iceberg`: `insert` quando o
+pedido não existe, `replace` (documento inteiro) quando já existe.
+
+### `scripts/reset_demo.py` — reset completo e idempotente
+```python
+coll.delete_many({"_id": {"$in": LIVE_IDS}})            # pedidos ao vivo
+coll.delete_many({"_id": {"$nin": sorted(seed_ids())}})  # qualquer sobra
+ReplaceOne({"_id": doc["_id"]}, doc, upsert=True)        # 5.000 do seed, lotes de 1.000
+db.dlq.delete_many({})
+```
+Recusa qualquer banco que não termine em `_test` sem `ALLOW_DEMO_DB_WRITE=1`.
+Documentos do seed já idênticos não geram evento de change stream, então um
+reset numa demo limpa não mexe no Iceberg.
 
 ## `.find()` — MongoDB
 

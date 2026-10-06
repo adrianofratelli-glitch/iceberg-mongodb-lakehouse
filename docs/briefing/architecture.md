@@ -156,6 +156,23 @@ deletes 30–60s.
   scripts de demo não precisam de `boto3`/`fastapi`; separar evita que uma
   dependência pesada do backend vaze para o fluxo de seed/demo.
 
+## Reset e bancos de teste
+
+`scripts/reset_demo.py` é o comando único que devolve a demo ao ponto de
+partida: garante `changeStreamPreAndPostImages`, remove os pedidos ao vivo e
+qualquer documento fora do seed, regrava os 5.000 pedidos determinísticos e
+esvazia a DLQ. O seed usa uma âncora de data fixa (`SEED_ANCHOR`, padrão
+2026-08-24T18:59:04Z): antes ela era "agora", e como o `_id` carrega o mês
+(`PED-AAAAMM-…`), rodar o seed em outro mês gravava 5.000 ids novos por cima
+dos antigos. O Iceberg não é tocado pelo reset: as escritas propagam pelo
+processor. Recriar a tabela do zero é o caminho destrutivo separado
+(`rebuild_table.py --auto-rebuild` + `restart_processor.js`).
+
+Escrita em banco que não termina em `_test` exige `ALLOW_DEMO_DB_WRITE=1`.
+Testes e medições usam `iceberg_demo_test` (`DATABASE_NAME` no ambiente vence
+o `.env`). `scripts/cdc_probe.py` mede, nesse banco, a perna escrita → evento
+do change stream e a retomada por resume token.
+
 ## Onde continuar
 
 - `implementation_plan.md` (raiz) — capa do projeto.
