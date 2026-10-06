@@ -46,7 +46,7 @@ const DLQ_COLL = "dlq";
 
 print(`Checking changeStreamPreAndPostImages on ${SOURCE_DATABASE}.${SOURCE_COLLECTION}...`);
 
-if (SOURCE_URI.startsWith("REPLACE-ME")) {
+if (SOURCE_URI.includes("<user>") || SOURCE_URI.includes("<password>")) {
   print("ABORT: SOURCE_URI not configured. Set MONGODB_URI in the environment " +
     "(same value as backend/.env) or edit SOURCE_URI at the top of this file.");
   quit(1);
