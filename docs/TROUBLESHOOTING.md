@@ -115,7 +115,7 @@ is not replayed from the stream -- initialSync picks it up from the collection,
 which is the source of truth, so the table still comes back complete.
 
 Hit on 2026-09-01 with checkpoints from 2026-08-27: all three processors in the
-`spi-inter-pix` workspace failed this way at the same time.
+shared Stream Processing workspace failed this way at the same time.
 
 ## Duplicate rows in Athena after a restart
 

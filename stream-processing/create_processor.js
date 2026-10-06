@@ -17,7 +17,7 @@ const SOURCE_COLLECTION = "orders";
 // Defaults to the MONGODB_URI env var (same one used by backend/.env) so
 // mongosh sessions started with that variable already set need no edit here.
 const SOURCE_URI = (typeof process !== "undefined" && process.env && process.env.MONGODB_URI) ||
-  "REPLACE-ME-mongodb+srv://user:pass@cluster.mongodb.net/";
+  "mongodb+srv://<user>:<password>@<cluster>.mongodb.net/";
 
 const S3_CONNECTION = "s3-iceberg";
 const S3_BUCKET = "REPLACE-ME-seu-bucket";
