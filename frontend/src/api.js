@@ -9,7 +9,11 @@ async function boundedRequest(work, timeoutMs = 30000) {
 const json = async (res) => {
   if (!res.ok) {
     const body = await res.json().catch(() => ({}))
-    throw new Error(body.detail || `HTTP ${res.status}`)
+    // FastAPI validation errors come as a list of {msg}; show text, not [object Object].
+    const detail = Array.isArray(body.detail)
+      ? body.detail.map((d) => d.msg).filter(Boolean).join('; ')
+      : body.detail
+    throw new Error(detail || `HTTP ${res.status}`)
   }
   return res.json()
 }
