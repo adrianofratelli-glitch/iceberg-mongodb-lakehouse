@@ -6,7 +6,7 @@ import QueryDetails from './QueryDetails'
 const PASSOS = [
   { op: 'insert', rotulo: 'INSERT', descricao: 'Pedido novo entra pelo caminho transacional.' },
   { op: 'update', rotulo: 'UPDATE', descricao: 'Data lake append-only não faria isso sem reescrever partição.' },
-  { op: 'delete', rotulo: 'DELETE', descricao: 'A linha some do lake. Direito ao esquecimento atravessa o circuito.' },
+  { op: 'delete', rotulo: 'DELETE', descricao: 'A linha some da visão atual do lake; os snapshots antigos a guardam até expirar.' },
   { op: 'schema', rotulo: 'CAMPO NOVO', descricao: 'fraudScore vira coluna sem ALTER TABLE.' },
 ]
 
@@ -23,6 +23,7 @@ export default function CicloCdc({ aoMudar }) {
   const [propagou, setPropagou] = useState(null)
   const [esgotou, setEsgotou] = useState(false)
   const [queryDetails, setQueryDetails] = useState(null)
+  const [ultimaOp, setUltimaOp] = useState(null)
   const cancelar = useRef(false)
 
   useEffect(() => () => { cancelar.current = true }, [])
@@ -66,6 +67,7 @@ export default function CicloCdc({ aoMudar }) {
 
   const executar = async (op) => {
     setOcupado(op)
+    setUltimaOp(op)
     setErro(null)
     setPropagou(null)
     setEsgotou(false)
@@ -123,7 +125,12 @@ export default function CicloCdc({ aoMudar }) {
         </button>
       </div>
 
-      {mensagem && !erro && <div className="notice ok">{mensagem}</div>}
+      {mensagem && !erro && (
+        <div className={`notice ${propagou !== null ? 'ok' : 'warn'}`} role="status">
+          {mensagem}
+          {propagou !== null && <> <strong>Confirmado no Iceberg em {propagou}s.</strong></>}
+        </div>
+      )}
       {erro && <div className="notice bad"><strong>Falhou.</strong> {erro}</div>}
       {queryDetails && (
         <QueryDetails
@@ -148,9 +155,9 @@ export default function CicloCdc({ aoMudar }) {
             <span className="badge">ICEBERG</span>
             <span role="status">
               {iceberg?.erro
-                ? 'indisponível'
+                ? 'não confirmado — Iceberg indisponível'
                 : propagou !== null
-                  ? `refletido em ${propagou}s`
+                  ? `confirmado no Iceberg em ${propagou}s`
                   : esgotou
                     ? `não refletiu em ${decorrido ?? 0}s — veja o estado do processor e a DLQ no preflight`
                     : `aguardando propagação… ${decorrido ?? 0}s`}
@@ -172,7 +179,9 @@ export default function CicloCdc({ aoMudar }) {
                 <tr key={i}>{linha.map((c, j) => <td key={j}>{c === '' ? '—' : c}</td>)}</tr>
               ))}
               {!(iceberg.linhas || []).length && (
-                <tr><td colSpan={(iceberg.colunas || []).length || 1}>0 linhas — o delete propagou.</td></tr>
+                <tr><td colSpan={(iceberg.colunas || []).length || 1}>{ultimaOp === 'delete'
+                  ? '0 linhas na visão atual — o delete propagou. Os snapshots anteriores ainda guardam a linha; veja Direito ao esquecimento.'
+                  : '0 linhas — o evento ainda não chegou ao Iceberg.'}</td></tr>
               )}
             </tbody>
           </table>

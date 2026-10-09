@@ -18,6 +18,7 @@ from pydantic import BaseModel
 import athena_side
 import lag_side
 import mongo_side
+import rtbf_side
 import settings
 
 app = FastAPI(title="Iceberg + MongoDB", version="1.0.0")
@@ -107,6 +108,24 @@ def preflight():
         }
     )
 
+    try:
+        maior = mongo_side.largest_document_bytes()
+        grande = maior > mongo_side.ALERTA_DOCUMENTO_BYTES
+        checks.append(
+            {
+                "item": "Maior documento",
+                "estado": "alerta" if grande else "ok",
+                "detalhe": (
+                    f"{maior / 1024 / 1024:.1f} MB: um UPDATE pode gerar evento acima de 16 MB, "
+                    "que o change stream não entrega. Mantenha os documentos abaixo de 8 MB."
+                    if grande
+                    else f"{maior} bytes"
+                ),
+            }
+        )
+    except Exception as exc:  # noqa: BLE001 -- informativo, não derruba o preflight
+        checks.append({"item": "Maior documento", "estado": "alerta", "detalhe": safe_error(exc, 200)})
+
     aws = athena_side.identity()
     checks.append(
         {
@@ -115,8 +134,42 @@ def preflight():
             "detalhe": safe_error(aws.get("arn") or aws.get("erro") or ""),
         }
     )
+    faltando = [
+        nome
+        for nome, valor in (("S3_BUCKET", settings.S3_BUCKET), ("STREAM_PROCESSING_URI", settings.STREAM_PROCESSING_URI))
+        if not valor
+    ]
+    if faltando:
+        checks.append(
+            {
+                "item": "Configuração do lake",
+                "estado": "alerta",
+                "detalhe": f"Ausente no .env: {', '.join(faltando)}. "
+                + ("Sem S3_BUCKET o Athena usa o local de resultados do workgroup. " if "S3_BUCKET" in faltando else "")
+                + ("Sem STREAM_PROCESSING_URI o painel de lag do processor fica desligado." if "STREAM_PROCESSING_URI" in faltando else ""),
+            }
+        )
 
-    return {"ok": ok, "checks": checks}
+    demo_completa = ok and aws["disponivel"]
+    if demo_completa:
+        resumo = "Demo completa: MongoDB e Iceberg disponíveis."
+    elif not aws["disponivel"]:
+        resumo = (
+            f"Modo somente MongoDB. {aws.get('erro') or 'Credencial AWS indisponível.'} "
+            "INSERT, UPDATE, DELETE e CAMPO NOVO gravam no Atlas, mas o Iceberg, o time travel e "
+            "as consultas analíticas ficam indisponíveis e nenhuma propagação é confirmada até "
+            "renovar a credencial (aws sso login, ou bloco novo em ~/.aws/credentials). "
+            "A PoV volta sozinha, sem reiniciar."
+        )
+    else:
+        resumo = "O lado MongoDB tem pendências; veja os itens em falha."
+    return {
+        "ok": ok,
+        "demo_completa": demo_completa,
+        "modo": "completa" if demo_completa else ("somente_mongodb" if ok else "degradada"),
+        "resumo": safe_error(resumo, 600),
+        "checks": checks,
+    }
 
 
 @app.get("/api/visao-geral")
@@ -193,12 +246,20 @@ def demo(operacao: str):
 
     if isinstance(resultado, dict) and "orderDate" in resultado:
         resultado = {**resultado, "orderDate": str(resultado["orderDate"])}
+    # A escrita no MongoDB está confirmada (o driver devolveu o resultado). A
+    # entrega ao Iceberg NÃO: quem a confirma é a leitura do lake
+    # (GET /api/pedido/{id}), que a interface faz em seguida. A mensagem não
+    # pode afirmar mais do que isso.
     mensagens = {
-        "insert": "Pedido inserido no MongoDB. O change stream já levou o evento adiante.",
-        "update": "Pedido atualizado. Data lake append-only não faria isso sem reescrever partição.",
-        "delete": "Pedido removido. Acompanhe a linha sumir do Iceberg.",
-        "schema": "Pedido com campo novo. O Iceberg evolui o schema sozinho.",
-        "reset": "Documentos da demo removidos.",
+        "insert": "Pedido gravado no MongoDB. Evento enviado ao change stream; "
+        "aguardando confirmação do Iceberg.",
+        "update": "Pedido atualizado no MongoDB; aguardando confirmação do Iceberg. "
+        "Um lake append-only precisaria reescrever a partição.",
+        "delete": "Pedido removido do MongoDB; aguardando a linha sumir da visão atual do Iceberg. "
+        "Os snapshots anteriores ainda a guardam até a expiração (ver Direito ao esquecimento).",
+        "schema": "Pedido com campo novo gravado no MongoDB; aguardando o processor levar "
+        "fraudScore ao catálogo.",
+        "reset": "Documentos da demo removidos do MongoDB.",
     }
     ids = {
         "insert": settings.LIVE_ORDER_ID,
@@ -237,6 +298,11 @@ def demo(operacao: str):
         "operacao": operacao,
         "documento": resultado,
         "mensagem": mensagens[operacao],
+        "propagacao": {
+            "mongo": "confirmado",
+            "iceberg": "aguardando_confirmacao",
+            "confirmar_em": f"/api/pedido/{ids.get(operacao, settings.LIVE_ORDER_ID)}",
+        },
         "query_details": {
             "operation": operacao,
             "namespace": f"{settings.DATABASE_NAME}.{settings.COLLECTION_NAME}",
@@ -333,5 +399,49 @@ async def rodar_consulta(consulta_id: QueryId):
         return {"disponivel": True, "sql": sql, **resultado}
     except athena_side.AwsUnavailable as exc:
         return {"disponivel": False, "sql": sql, "erro": safe_error(exc)}
+    except Exception as exc:  # noqa: BLE001
+        return JSONResponse(status_code=502, content={"disponivel": True, "erro": safe_error(exc)})
+
+
+@app.get("/api/esquecimento/{order_id}")
+async def esquecimento(order_id: OrderId):
+    """Só leitura: o pedido ainda aparece em algum snapshot retido?"""
+    base = {
+        "pedido": order_id,
+        "passos": rtbf_side.passos(),
+        "expurgo_habilitado": rtbf_side.expurgo_habilitado(),
+        "referencias": [
+            "https://iceberg.apache.org/docs/latest/maintenance/",
+            "https://docs.aws.amazon.com/athena/latest/ug/vacuum-statement.html",
+            "https://docs.aws.amazon.com/athena/latest/ug/optimize-statement.html",
+        ],
+    }
+    try:
+        base["no_mongo"] = (await run_in_threadpool(mongo_side.find_order, order_id)) is not None
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=503, detail=f"MongoDB indisponível: {safe_error(exc)}") from exc
+    try:
+        return {**base, "disponivel": True, **(await run_in_threadpool(rtbf_side.verificar, order_id))}
+    except athena_side.AwsUnavailable as exc:
+        return {**base, "disponivel": False, "erro": safe_error(exc)}
+    except Exception as exc:  # noqa: BLE001 -- Athena FAILED
+        return JSONResponse(status_code=502, content={**base, "disponivel": True, "erro": safe_error(exc)})
+
+
+@app.post("/api/esquecimento/{order_id}")
+async def expurgar(order_id: OrderId):
+    """Destrutivo (OPTIMIZE + VACUUM): só com ALLOW_LAKE_PURGE=1."""
+    if not rtbf_side.expurgo_habilitado():
+        raise HTTPException(
+            status_code=403,
+            detail="Expurgo desligado: ele apaga o time travel da tabela inteira. "
+            "Habilite com ALLOW_LAKE_PURGE=1 no ambiente do backend.",
+        )
+    try:
+        return {"disponivel": True, **(await run_in_threadpool(rtbf_side.expurgar, order_id))}
+    except rtbf_side.PreCondicao as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except athena_side.AwsUnavailable as exc:
+        return JSONResponse(status_code=503, content={"disponivel": False, "erro": safe_error(exc)})
     except Exception as exc:  # noqa: BLE001
         return JSONResponse(status_code=502, content={"disponivel": True, "erro": safe_error(exc)})
