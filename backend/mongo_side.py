@@ -49,6 +49,23 @@ def post_images_enabled() -> bool | None:
     )
 
 
+# Um UPDATE carrega o post-image inteiro no evento do change stream (o
+# processor usa fullDocument: "required"); acima de ~8 MB de documento, um
+# update grande passa dos 16 MB de evento e o change stream não o entrega.
+LIMITE_EVENTO_BYTES = 16 * 1024 * 1024
+ALERTA_DOCUMENTO_BYTES = 8 * 1024 * 1024
+
+
+def largest_document_bytes() -> int:
+    rows = list(
+        collection().aggregate(
+            [{"$group": {"_id": None, "maior": {"$max": {"$bsonSize": "$$ROOT"}}}}],
+            maxTimeMS=15000,
+        )
+    )
+    return int(rows[0]["maior"] or 0) if rows else 0
+
+
 def enable_post_images() -> None:
     client()[settings.DATABASE_NAME].command(
         {

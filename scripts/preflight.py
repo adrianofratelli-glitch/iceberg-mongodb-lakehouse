@@ -53,21 +53,27 @@ def check_aws():
         )
     except FileNotFoundError:
         print("[warn] AWS CLI not installed -- Athena checks unavailable")
-        return
+        return False
     except subprocess.TimeoutExpired:
         print("[warn] aws sts get-caller-identity timed out")
-        return
+        return False
 
     if result.returncode == 0:
         arn = json.loads(result.stdout).get("Arn", "?")
         print(f"[ok]   AWS credentials valid -- {arn}")
-        return
+        return True
+
+    print(
+        "[warn] MONGODB-ONLY MODE: the demo buttons still write to Atlas, but the Iceberg\n"
+        "       panels, time travel and analytical queries are unavailable and no\n"
+        "       propagation can be confirmed until the AWS credential is renewed."
+    )
 
     profile = _sso_profile()
     if profile:
         print(f"[warn] AWS credentials expired or missing -- refresh with:")
         print(f"           aws sso login --profile {profile}")
-        return
+        return False
 
     print("[warn] AWS credentials expired or missing (Athena and Glue unavailable)")
     print(f"       paste a fresh block from the SSO portal into {AWS_CREDENTIALS}")
@@ -78,6 +84,7 @@ def check_aws():
             AWS_CREDENTIALS.chmod(0o600)
         subprocess.run(["open", "-a", "TextEdit", str(AWS_CREDENTIALS)], check=False)
         print("       (opened it for you -- set POV_NO_POPUP=1 to skip)")
+    return False
 
 
 def main():
@@ -113,6 +120,21 @@ def main():
         if count == 0:
             print("[warn] collection is empty -- run scripts/seed_orders.py")
 
+        # An UPDATE ships the whole post-image in the change event; above ~8 MB a
+        # large update crosses the 16 MB event limit and is never delivered.
+        biggest = next(
+            coll.aggregate(
+                [{"$group": {"_id": None, "max": {"$max": {"$bsonSize": "$$ROOT"}}}}],
+                maxTimeMS=15000,
+            ),
+            {},
+        ).get("max") or 0
+        if biggest > 8 * 1024 * 1024:
+            print(f"[warn] largest document is {biggest / 1024 / 1024:.1f} MB -- an UPDATE can produce a")
+            print("       change event above 16 MB that the change stream cannot deliver")
+        else:
+            print(f"[ok]   largest document {biggest} bytes (event limit 16 MB)")
+
         dlq = db[DLQ_COLLECTION].count_documents({})
         if dlq:
             ok = False
@@ -133,9 +155,11 @@ def main():
             f"  both numbers must equal {count}; a higher total means the table was\n"
             "  duplicated by a restart -- see docs/TROUBLESHOOTING.md"
         )
-        check_aws()
+        aws_ok = check_aws()
 
-        print("\npreflight " + ("PASSED" if ok else "PASSED WITH WARNINGS"))
+        verdict = "PASSED" if ok and aws_ok else "PASSED WITH WARNINGS"
+        mode = "full demo" if aws_ok else "MongoDB-only mode"
+        print(f"\npreflight {verdict} ({mode})")
     finally:
         client.close()
 

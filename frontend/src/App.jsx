@@ -3,6 +3,7 @@ import { api, fmtBRL, fmtBytes, fmtInt } from './api'
 import AvisoAws from './components/AvisoAws'
 import CicloCdc from './components/CicloCdc'
 import Consultas from './components/Consultas'
+import Esquecimento from './components/Esquecimento'
 import TimeTravel from './components/TimeTravel'
 
 export default function App() {
@@ -96,6 +97,14 @@ export default function App() {
         </div>
 
         {erro && <div className="notice bad"><strong>Backend indisponível.</strong> {erro}</div>}
+
+        {preflight?.modo === 'somente_mongodb' && (
+          <div className="notice warn" role="status">
+            <strong>Modo somente MongoDB.</strong> Os botões do ciclo CDC gravam no Atlas, mas
+            nenhuma propagação ao Iceberg pode ser confirmada enquanto a credencial AWS estiver
+            indisponível. Iceberg, time travel e consultas voltam sozinhos ao renovar.
+          </div>
+        )}
 
         {postImages?.estado === 'falha' && (
           <div className="notice warn">
@@ -200,6 +209,13 @@ export default function App() {
           <summary>Time travel</summary>
           <div className="secondary-stage__body">
             <TimeTravel />
+          </div>
+        </details>
+
+        <details className="card secondary-stage">
+          <summary>Direito ao esquecimento</summary>
+          <div className="secondary-stage__body">
+            <Esquecimento />
           </div>
         </details>
 
