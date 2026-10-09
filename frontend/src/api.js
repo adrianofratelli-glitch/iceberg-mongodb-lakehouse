@@ -36,6 +36,8 @@ export const api = {
   consultas: () => request('/api/consultas'),
   rodarConsulta: (id) => request(`/api/consultas/${id}`, { method: 'POST' }),
   lag: () => request('/api/lag'),
+  esquecimento: (id) => request(`/api/esquecimento/${id}`),
+  expurgar: (id) => request(`/api/esquecimento/${id}`, { method: 'POST' }),
 }
 
 export const fmtInt = (n) =>

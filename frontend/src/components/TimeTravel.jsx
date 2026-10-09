@@ -37,7 +37,7 @@ export default function TimeTravel() {
     <>
       <p className="hint" style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
         Cada commit do processor virou um snapshot. Clique em um para ver o pedido
-        como ele estava naquele instante — inclusive depois de apagado.
+        como ele estava naquele instante — inclusive depois de apagado, enquanto o snapshot não expirar.
       </p>
 
       {carregando && !dados && <p className="empty">Consultando o catálogo…</p>}
