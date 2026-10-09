@@ -36,7 +36,10 @@ Componentes de apoio reutilizados em várias seções:
 Ao montar, dispara em paralelo:
 - `GET /api/visao-geral` → estado dos dois lados (Mongo/Iceberg).
 - `GET /api/schema` → contagem de colunas no catálogo Glue.
-- `GET /preflight` → checagens de saúde (conexão, post-images, DLQ, credencial AWS).
+- `GET /preflight` → checagens de saúde (conexão, post-images, DLQ, maior documento,
+  credencial AWS, configuração do lake) e `modo` (`completa` / `somente_mongodb` /
+  `degradada`) com `resumo` em texto. Em `somente_mongodb` a UI mostra a faixa
+  "Modo somente MongoDB": os botões gravam no Atlas, nenhuma propagação é confirmada.
 - `GET /api/lag` → distância do checkpoint do processor até a janela do oplog.
 
 A pill de estado no topo (`estado`, linhas 39-49 de `App.jsx`) classifica em:
@@ -65,12 +68,16 @@ botão "Limpar" (reset). Cada clique:
    chamando `GET /api/pedido/{id}` até o lado Iceberg refletir a mudança
    esperada (linha existir/sumir, status bater no caso de update).
 4. Mostra uma timeline com dois passos — "MONGODB" (concluído) e "ICEBERG"
-   (aguardando… Xs / refletido em Xs). Se as 40 tentativas acabarem sem a
+   (aguardando… Xs / confirmado no Iceberg em Xs / não confirmado — Iceberg
+   indisponível). A mensagem do backend só afirma a escrita no MongoDB
+   (`propagacao.iceberg = "aguardando_confirmacao"`); a confirmação do lake é
+   a leitura do `GET /api/pedido/{id}`, e só então a faixa fica verde. Se as 40 tentativas acabarem sem a
    mudança aparecer, o passo diz "não refletiu em Xs — veja o estado do
    processor e a DLQ no preflight", em vez de ficar em "aguardando" para
    sempre.
-5. Renderiza a linha da tabela Iceberg retornada, ou "0 linhas — o delete
-   propagou" quando aplicável.
+5. Renderiza a linha da tabela Iceberg retornada, ou, depois de um DELETE,
+   "0 linhas na visão atual — o delete propagou", lembrando que os snapshots
+   anteriores ainda guardam a linha.
 
 Se o Iceberg responder erro (ex.: credencial AWS), mostra `AvisoAws` em vez
 da tabela. UPDATE antes do INSERT (ou depois do DELETE) devolve 409 e a UI
@@ -96,6 +103,23 @@ Screenshots:
 
 Screenshot: `docs/screenshots/04-time-travel.png` — histórico de snapshots
 com operações `append`, `overwrite` e `delete`.
+
+## Fluxo 3b — Direito ao esquecimento (`Esquecimento.jsx`, `<details>`)
+
+1. "Verificar PED-AOVIVO-001 nos snapshots" chama `GET
+   /api/esquecimento/PED-AOVIVO-001` (só leitura): diz se o pedido ainda está
+   no MongoDB, quantas linhas tem na visão atual do Iceberg e em quais dos
+   snapshots retidos (até 50) ele ainda aparece (`FOR VERSION AS OF` em cada um,
+   numa única query `UNION ALL`). Mostra os passos com o SQL e as ressalvas
+   (versionamento do bucket, `s3:DeleteObject`, backups e DLQ).
+2. "Expurgar do histórico" chama `POST /api/esquecimento/PED-AOVIVO-001`. Fica
+   desabilitado sem `ALLOW_LAKE_PURGE=1` no backend (403), com o pedido ainda no
+   MongoDB ou ainda na visão atual do Iceberg (409). Roda `ALTER TABLE` (limiares
+   de OPTIMIZE em 1) → `OPTIMIZE ... REWRITE DATA USING BIN_PACK` → `ALTER TABLE`
+   (retenção curta) → `VACUUM` → `ALTER TABLE` (retenção de volta a 432000 s) e
+   verifica de novo. Apaga o time travel da tabela inteira.
+
+Sem credencial AWS o painel mostra os passos e o aviso de credencial.
 
 ## Fluxo 4 — Consultas analíticas (`Consultas.jsx`, também em `<details>`)
 

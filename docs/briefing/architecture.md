@@ -91,8 +91,9 @@ snapshot Iceberg — histórico de append/overwrite/delete consultável via
 (seção "time travel" em `queries.md`).
 
 ### 4. Backend FastAPI (`backend/`)
-Nunca escreve no Iceberg — só lê (Athena) e opera no MongoDB (as ações de
-demo). Arquivos:
+Não escreve linhas no Iceberg — só lê (Athena) e opera no MongoDB (as ações de
+demo). A única exceção é a manutenção do direito ao esquecimento (`OPTIMIZE` +
+`VACUUM`), que só roda com `ALLOW_LAKE_PURGE=1`. Arquivos:
 
 - `main.py` — rotas HTTP.
 - `mongo_side.py` — tudo que toca o cluster operacional (conexão, overview,
@@ -104,6 +105,11 @@ demo). Arquivos:
   workspace de ASP) e a janela do oplog do cluster fonte. Sinal antecipado
   antes do processor cair de vez com "resume of change stream was not
   possible".
+- `rtbf_side.py` — direito ao esquecimento: o DELETE só tira a linha da visão
+  atual; os snapshots anteriores continuam referenciando o arquivo ("Data files
+  are not deleted until they are no longer referenced by a snapshot", Iceberg
+  Maintenance). Verifica snapshot a snapshot e, com `ALLOW_LAKE_PURGE=1`, roda
+  OPTIMIZE + VACUUM com retenção.
 - `settings.py` — configuração via `.env` na raiz do repo.
 
 ### 5. Frontend React (`frontend/`)

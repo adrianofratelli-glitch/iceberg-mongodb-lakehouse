@@ -13,6 +13,9 @@ own — including the two a traditional append-only lake struggles with.
 
 Measured against a real cluster and a real bucket (2026-08-24): **5,000 orders
 on both sides, inserts visible in ~10s, updates in ~20s, deletes in 30-60s.**
+Not re-measured since: the AWS credential was expired during the October 2026
+review rounds, so only the MongoDB → change stream leg was measured then (see
+*Measuring the change-stream leg*).
 
 ![Architecture: Atlas cluster, Atlas Stream Processing, Iceberg on S3, Glue and Athena](docs/architecture.png)
 
@@ -42,17 +45,65 @@ step that matters: an append-only lake would need a partition rewrite.
 
 ![The same order showing EM_TRANSPORTE and the new amount, reflected in 35 seconds](docs/screenshots/03-update-refletido.png)
 
-Delete works the same way — the row disappears from the table. For regulated
-industries that is the right-to-be-forgotten reaching the lake without a
-compaction job.
+Delete works the same way — the row disappears from the table's current view.
+It does **not** disappear from history: older snapshots still reference the data
+file that holds it, which is exactly what makes time travel work. Erasing it for
+good takes table maintenance, shown in step 4b below.
 
 ### 4. Time travel comes free with the format
 
 Every processor commit is an Iceberg snapshot. Click one and the order comes
-back as it was at that instant, even after being deleted from MongoDB. Nobody
-configured versioning.
+back as it was at that instant, even after being deleted from MongoDB — until
+that snapshot expires. Nobody configured versioning.
 
 ![Iceberg snapshot history with append, overwrite and delete operations](docs/screenshots/04-time-travel.png)
+
+### 4b. Right to be forgotten: delete, then expire
+
+Time travel and erasure pull in opposite directions. The Iceberg maintenance
+docs are explicit: *"Data files are not deleted until they are no longer
+referenced by a snapshot that may be used for time travel or rollback"*
+([Iceberg — Maintenance](https://iceberg.apache.org/docs/latest/maintenance/)).
+So a DELETE that reached the lake is step one of three:
+
+1. **DELETE in MongoDB.** The processor commits it; the row leaves the current
+   view. Every earlier snapshot still has it.
+2. **Rewrite the files with the delete applied** — Athena
+   [`OPTIMIZE ... REWRITE DATA USING BIN_PACK`](https://docs.aws.amazon.com/athena/latest/ug/optimize-statement.html).
+   The thresholds `optimize_rewrite_delete_file_threshold` and
+   `optimize_rewrite_data_file_threshold` (defaults 2 and 5,
+   [table properties](https://docs.aws.amazon.com/athena/latest/ug/querying-iceberg-creating-tables.html))
+   are set to 1, otherwise a single delete does not trigger a rewrite.
+3. **Expire snapshots and remove files** — Athena
+   [`VACUUM`](https://docs.aws.amazon.com/athena/latest/ug/vacuum-statement.html)
+   expires snapshots older than `vacuum_max_snapshot_age_seconds` (default
+   432,000 s, 5 days), deletes the data files that became unreachable and the
+   orphan files. After that the order cannot be time-travelled to.
+
+The UI panel *Direito ao esquecimento* shows the steps with their SQL and checks,
+snapshot by snapshot (`FOR VERSION AS OF` on each retained snapshot), whether the
+order can still come back. The same from the CLI:
+
+```bash
+./backend/venv/bin/python stream-processing/forget_order.py PED-AOVIVO-001          # read-only check
+ALLOW_LAKE_PURGE=1 ./backend/venv/bin/python stream-processing/forget_order.py \
+    PED-AOVIVO-001 --purge --retention-seconds 1                                    # destructive
+```
+
+The purge refuses while the order still exists in MongoDB or in the current
+Iceberg view, and it is off unless `ALLOW_LAKE_PURGE=1`, because it removes time
+travel for the **whole table**, not just one order. In production the retention
+*is* the erasure SLA: a scheduled VACUUM with 5-day retention completes erasure
+within 5 days plus the schedule interval. What this does not cover: S3 object
+versioning (deleted objects become noncurrent versions until a lifecycle rule
+expires them — the check reports the bucket's versioning status), a query role
+without `s3:DeleteObject` (VACUUM then succeeds and deletes nothing, per the
+Athena docs), Atlas backups and the dead-letter queue, which have their own
+retention.
+
+Status: implemented and covered by offline tests; **not yet run against the
+real table** — the AWS credential was expired during the 2026-10-08 round. Run
+the read-only check first when it is renewed.
 
 ### 5. The question nobody runs on the operational cluster
 
@@ -97,8 +148,13 @@ cd ../frontend && npm install
 cd .. && ./start.sh          # backend :8250, frontend :5250
 ```
 
-The Iceberg panels need AWS credentials; without them the MongoDB side keeps
-working and the UI says what is missing.
+The Iceberg panels need AWS credentials. Without them the demo runs in
+**MongoDB-only mode**: `/preflight` returns `modo: "somente_mongodb"` with a
+plain-language `resumo`, the UI shows a banner, the CDC buttons still write to
+Atlas, and every step stays at "aguardando confirmação" — the backend reports a
+write as confirmed in MongoDB only; the lake side is confirmed by reading the
+row back from Athena, never assumed. Renewing the credential brings the Iceberg
+side back without a restart.
 
 ## Driving the demo from the CLI
 
@@ -172,7 +228,7 @@ and dotted keys arrive verbatim in the change stream, and a 10 MB document is
 served. It also pins a real limit: updating a ~9 MB field of a ~10 MB document
 produces a change event above 16 MB that a plain change stream cannot deliver
 (`$changeStreamSplitLargeEvent` splits it). Keep documents well below that if
-they are going to the lake.
+they are going to the lake; the preflight warns above 8 MB.
 
 ## Before every demo
 
@@ -181,7 +237,9 @@ they are going to the lake.
 ```
 
 It checks the connection, enables `changeStreamPreAndPostImages` when missing,
-reports the dead-letter queue and flags expired AWS credentials.
+reports the dead-letter queue and the largest document (above 8 MB an UPDATE can
+produce a change event over the 16 MB limit), flags expired AWS credentials and
+ends with `PASSED (full demo)` or `PASSED WITH WARNINGS (MongoDB-only mode)`.
 
 ## Things that break it
 

@@ -53,7 +53,10 @@ python scripts/delete_order.py
 
 Run `sql/04_validate_delete.sql`.
 
-Message: **The operational delete is reflected in the Iceberg table.**
+Message: **The operational delete is reflected in the Iceberg table's current view.**
+Older snapshots still hold the row (that is time travel). For right-to-be-forgotten,
+show the *Direito ao esquecimento* panel: OPTIMIZE + VACUUM with a retention is what
+removes it from history (`stream-processing/forget_order.py`).
 
 ### 5. Schema evolution
 

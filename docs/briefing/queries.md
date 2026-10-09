@@ -204,6 +204,18 @@ lê o arquivo, remove comentários, roda o primeiro statement.
   = '<id>'`. Usado por `GET
   /api/snapshots/{snapshot_id}/pedido/{order_id}` para reconstruir o pedido
   como ele era num snapshot específico, mesmo já deletado no presente.
+- **`rtbf_side.verificar(order_id)`** (`backend/rtbf_side.py`) — lê os
+  `snapshot_id` de `"<db>"."<tabela>$snapshots"` (50 mais recentes) e roda uma
+  única query `SELECT CAST(<sid> AS bigint) ... FOR VERSION AS OF <sid> WHERE
+  _id = '<id>' UNION ALL ...` para saber em quais snapshots retidos o pedido
+  ainda aparece; `s3.get_bucket_versioning` informa se há versões não correntes.
+- **`rtbf_side.expurgar(order_id, retencao_s)`** — com `ALLOW_LAKE_PURGE=1`:
+  `ALTER TABLE ... SET TBLPROPERTIES ('optimize_rewrite_delete_file_threshold'='1',
+  'optimize_rewrite_data_file_threshold'='1')`, `OPTIMIZE ... REWRITE DATA USING
+  BIN_PACK`, `ALTER TABLE ... ('vacuum_max_snapshot_age_seconds'='<retencao>')`,
+  `VACUUM ...`, `ALTER TABLE ... ('vacuum_max_snapshot_age_seconds'='432000')`.
+  Também em `stream-processing/forget_order.py`. Não validado contra a tabela
+  real na rodada de 2026-10-08 (credencial AWS expirada).
 - **`drop_table()` (linha 131-141)** — `DROP TABLE IF EXISTS <db>.<tabela>`.
   Usado por `stream-processing/rebuild_table.py --auto-rebuild` antes de um
   restart sem checkpoint, para evitar duplicar a tabela (ver
