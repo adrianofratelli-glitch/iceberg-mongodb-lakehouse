@@ -101,6 +101,12 @@ without `s3:DeleteObject` (VACUUM then succeeds and deletes nothing, per the
 Athena docs), Atlas backups and the dead-letter queue, which have their own
 retention.
 
+Two things are still unverified against Atlas Stream Processing: whether the
+delete files written by `$iceberg` are the kind Athena's OPTIMIZE applies, and
+how OPTIMIZE/ALTER interact with commits the processor makes at the same time
+(Iceberg commits are optimistic, so expect a retry or a failed maintenance
+query). Run the purge at low write volume and re-run the check afterwards.
+
 Status: implemented and covered by offline tests; **not yet run against the
 real table** — the AWS credential was expired during the 2026-10-08 round. Run
 the read-only check first when it is renewed.
