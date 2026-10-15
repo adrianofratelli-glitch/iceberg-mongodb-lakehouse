@@ -20,7 +20,7 @@ import lag_side
 import mongo_side
 import settings
 
-app = FastAPI(title="Iceberg + MongoDB", version="1.0.0")
+app = FastAPI(title="Iceberg + MongoDB", version="1.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://127.0.0.1:5250", "http://localhost:5250"],
