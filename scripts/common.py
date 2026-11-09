@@ -6,9 +6,9 @@ from pathlib import Path
 from datetime import datetime, timezone
 from pymongo import MongoClient
 
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+HERE = Path(__file__).resolve().parent  # scripts/ (onde mora o config.py)
+if str(HERE) not in sys.path:
+    sys.path.insert(0, str(HERE))
 
 
 def _load_config():

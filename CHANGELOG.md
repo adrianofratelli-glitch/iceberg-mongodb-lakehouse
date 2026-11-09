@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Reorganização: `config.py` saiu da raiz para `scripts/` (só os scripts o usam).
 - Atualiza dependências compatíveis e pisos de segurança; alinha metadados de versão entre aplicação e frontend.
 
 - UI: layout MongoDB 2026 "Dark Stage v4" (tokens mais escuros, Special Gothic / Source Code Pro locais, motivos de escada e grade, movimento escalonado).
