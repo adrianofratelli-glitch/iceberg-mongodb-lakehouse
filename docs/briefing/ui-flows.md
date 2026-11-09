@@ -1,5 +1,7 @@
 # Telas e fluxos da interface
 
+> Números de linha podem ficar defasados após mudanças: a fonte atualizada é [MAPA_DO_CODIGO.md](../MAPA_DO_CODIGO.md).
+
 Frontend React (Vite) em `frontend/src/`, servido em `:5250`, consumindo o
 backend FastAPI em `:8250` (`frontend/src/api.js`). Tela única (`App.jsx`)
 com seções sequenciais, sem roteamento — pensada para apresentação ao vivo,

@@ -1,5 +1,7 @@
 # Queries, pipelines e índices
 
+> Números de linha podem ficar defasados após mudanças: a fonte atualizada é [MAPA_DO_CODIGO.md](../MAPA_DO_CODIGO.md).
+
 Levantamento direto do código (grep por `.aggregate(`, `.find(`,
 `create_index`/`createIndex`, config de change stream). Nada inventado —
 cada item abaixo aponta para o arquivo:linha real.
@@ -51,7 +53,7 @@ replicação para o Iceberg.
 
 ## Aggregation pipelines — MongoDB
 
-### `backend/mongo_side.py:64-68` — distribuição de pedidos por status
+### `backend/mongo_side.py:65-67` — distribuição de pedidos por status
 ```python
 coll.aggregate(
     [{"$group": {"_id": "$status", "n": {"$sum": 1}}}, {"$sort": {"n": -1}}]
@@ -150,7 +152,7 @@ reset numa demo limpa não mexe no Iceberg.
 
 ## `.find()` — MongoDB
 
-### `backend/mongo_side.py:97` — `find_order`
+### `backend/mongo_side.py:107-108` — `find_order`
 ```python
 collection().find_one({"_id": order_id})
 ```
@@ -186,11 +188,11 @@ lê o arquivo, remove comentários, roda o primeiro statement.
 
 ### Consultas auxiliares no backend (`athena_side.py`)
 
-- **`counts()` (linha 157-168)** — `SELECT count(*) AS total, count(DISTINCT
+- **`counts()` (linha 173-184)** — `SELECT count(*) AS total, count(DISTINCT
   _id) AS ids FROM <tabela>`. Usado por `GET /api/visao-geral` para o card
   Iceberg e para a lógica de "convergiu / propagando / tabela duplicada" (se
   `total > ids`, a tabela foi duplicada por um restart sem checkpoint).
-- **`find_order(order_id)` (linha 171-176)** — `SELECT _id, status, amount,
+- **`find_order(order_id)` (linha 187-192)** — `SELECT _id, status, amount,
   channel, paymentmethod FROM <tabela> WHERE _id = '<id>'`. Usado por `GET
   /api/pedido/{order_id}`. Interpolação de string sanitizada por `_safe()`
   (linha 198-202, regex `[A-Za-z0-9][A-Za-z0-9_-]{0,127}` — Athena não tem

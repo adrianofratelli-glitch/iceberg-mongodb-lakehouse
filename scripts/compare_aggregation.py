@@ -7,7 +7,7 @@ checkout path. The same aggregation over Iceberg on S3 costs the cluster
 nothing.
 
 Pair the number printed here with the Athena figures in
-docs/briefing/03-interface-fluxos.md.
+docs/briefing/ui-flows.md.
 """
 
 import time

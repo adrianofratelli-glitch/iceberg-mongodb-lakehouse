@@ -1,5 +1,7 @@
 # Arquitetura
 
+> Números de linha podem ficar defasados após mudanças: a fonte atualizada é [MAPA_DO_CODIGO.md](../MAPA_DO_CODIGO.md).
+
 ## O que é essa PoV
 
 CDC (Change Data Capture) do MongoDB Atlas para uma tabela Apache Iceberg no
