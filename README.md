@@ -1,5 +1,7 @@
 # Iceberg + MongoDB
 
+Mapa do código: [docs/MAPA_DO_CODIGO.md](docs/MAPA_DO_CODIGO.md)
+
 Operational data lives in MongoDB. Analytics lives in the lake. Keeping the two
 in sync is usually a pipeline someone owns: Debezium, Kafka, Spark jobs, a
 nightly batch that drifts.
