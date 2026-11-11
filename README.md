@@ -102,6 +102,25 @@ cd .. && ./start.sh          # backend :8250, frontend :5250
 The Iceberg panels need AWS credentials; without them the MongoDB side keeps
 working and the UI says what is missing.
 
+## Docker
+
+One container: nginx serves the built UI on port 8080 and proxies `/api` and `/preflight` to the FastAPI
+backend (single worker on `127.0.0.1:8000`); `/health/live` is also exposed for the container healthcheck.
+
+```bash
+docker build -t iceberg-mongodb-lakehouse .
+docker run --env-file .env.docker -p 8080:8080 iceberg-mongodb-lakehouse
+curl -fsS http://127.0.0.1:8080/health/live
+curl -fsS http://127.0.0.1:8080/preflight      # connection, post-images, DLQ, AWS credential
+```
+
+`docker run --env-file` does not strip quotes: write `KEY=value` with no quotes in the file you
+pass (a quoted `MONGODB_URI` reaches the driver with the quotes and fails). No `.env` and no secret go into
+the image; everything is read from the environment at runtime.
+AWS credentials are not mounted: pass `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`
+and `AWS_SESSION_TOKEN` as environment variables, or the Iceberg panels report what is missing while the
+MongoDB side keeps working. `mongosh` is not in the image, so `/api/lag` reports itself unavailable.
+
 ## Driving the demo from the CLI
 
 ```bash
