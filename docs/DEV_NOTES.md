@@ -44,17 +44,15 @@ de boto3 e fastapi.
 
 ## Invariantes que quebram a demo
 
-1. A coleção precisa de `changeStreamPreAndPostImages`, senão o processor morre
-   no primeiro UPDATE. `preflight.py` corrige.
-2. Reiniciar sem checkpoint **duplica a tabela** — `initialSync` insere, não faz
-   upsert. Dropar a tabela antes.
-3. Nome de campo com `.` derruba o processor e não vai para a DLQ.
-4. `Decimal128` e conflito de tipo vão para a DLQ (`iceberg_demo.dlq`).
-5. O backend nunca escreve no Iceberg. Quem alimenta a tabela é o processor.
-6. IDs vindos de rota nunca são “limpos” silenciosamente. Pedido e consulta usam
-   allowlist; snapshot é inteiro positivo limitado. Entrada fora do contrato
-   recebe `422` antes de chegar ao MongoDB, Athena ou filesystem.
-
+1. A coleção precisa de `changeStreamPreAndPostImages`, senão o processor morre no primeiro UPDATE. `create_processor.js` habilita/aborta; `preflight.py` e `POST /api/corrigir/post-images` são o corretor manual.
+2. Reiniciar sem checkpoint **duplica a tabela** (`initialSync` insere, não faz upsert). `restart_processor.js` recusa rodar sem `AUTO_REBUILD=1`; drope a tabela antes (`rebuild_table.py --auto-rebuild`).
+3. Nome de campo com `.` ou `$` derruba o processor e **não** vai para a DLQ. O estágio de sanitização (`$function`) em `create_processor.js` renomeia antes do `$iceberg`; se `$function` não existir na versão do ASP, troque por `$project` explícito (ver nota no arquivo).
+4. `Decimal128` e conflito de tipo vão para a DLQ `iceberg_demo.dlq`. Valores monetários ficam `double`.
+5. O backend nunca escreve no Iceberg; quem alimenta a tabela é o processor.
+6. Tabela Iceberg sem particionamento: limitação do `$iceberg` desta versão (sem `partitionBy`), não escolha. Se surgir suporte, revisite `create_processor.js`.
+7. `/api/lag` (`backend/lag_side.py`) usa `mongosh --eval 'sp.<nome>.stats()'`, exige `STREAM_PROCESSING_URI` e leitura de `local.oplog.rs`; o parsing de `stats()` **não foi validado** contra workspace real — confira os nomes de campo antes de usar em demo.
+8. IDs de rota nunca são "limpos" em silêncio: pedido/consulta em allowlist, snapshot inteiro positivo limitado; fora do contrato → 422 antes de tocar MongoDB, Athena ou filesystem.
+9. Seed ancorado em `SEED_ANCHOR` fixo (padrão `2026-08-24T18:59:04Z`) porque o `_id` (`PED-AAAAMM-…`) carrega o mês. Mudar a âncora exige rodar `reset_demo.py` para remover os ids antigos.
 
 ## Interface
 

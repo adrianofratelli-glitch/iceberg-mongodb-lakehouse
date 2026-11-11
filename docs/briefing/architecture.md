@@ -154,6 +154,19 @@ deletes 30–60s.
 - **Sem particionamento na tabela Iceberg.** Não é decisão de design — é
   limitação da versão do `$iceberg` do ASP usada aqui (sem `partitionBy`
   documentado). Fica registrado para não ser confundido com escolha.
+- **Credencial AWS renovada sem reiniciar.** `athena_side._client()` cria
+  uma `boto3` Session nova a cada chamada, então credencial nova em
+  `~/.aws/credentials` vale na requisição seguinte; enquanto o lado Iceberg
+  estiver fora, o frontend (`App.jsx`) reconsulta a cada 8 s com a aba
+  visível. Teste: `backend/tests/test_credentials_refresh.py`.
+- **Prazo no frontend** (`frontend/src/api.js`): `/preflight` é abortado em
+  30 s e as demais chamadas em 300 s (headers e corpo), sem reenviar
+  requisição, para não gastar de novo o orçamento das consultas Athena.
+  Regressão em `frontend/tests/http-deadline.test.mjs`.
+- **`/api/lag` é sinal auxiliar, não validado em workspace real.** Exige
+  `STREAM_PROCESSING_URI` e leitura de `local.oplog.rs` no cluster fonte
+  (pode ser restrita em alguns tiers). Os nomes de campo lidos de `stats()`
+  devem ser conferidos antes de usar o painel em demo.
 - **Dois ambientes Python separados** (`.venv/` vs `backend/venv/`) — os
   scripts de demo não precisam de `boto3`/`fastapi`; separar evita que uma
   dependência pesada do backend vaze para o fluxo de seed/demo.
