@@ -83,8 +83,9 @@ processor (`dlq: { connectionName, db, coll }`).
 
 **Particionamento:** o processor foi criado (2026-08) sem `partitionedBy`,
 que não existia no estágio. A doc atual do `$iceberg` aceita `partitionedBy`
-(1 a 3 transforms, o primeiro sobre o `idFieldName`) e aplica um transform
-padrão no id quando o campo é omitido. As consultas de negócio agrupam a base
+(1 a 3 transforms, o primeiro sobre o `idFieldName`) e diz aplicar um
+transform padrão no id quando o campo é omitido (a confirmar nos metadados
+desta tabela). As consultas de negócio agrupam a base
 inteira, então varrem a tabela toda de qualquer forma. Mudar exige drop da tabela e
 restart sem checkpoint: registrado em `docs/adr/0004-particionamento.md`.
 

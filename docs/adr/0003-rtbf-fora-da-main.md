@@ -10,7 +10,7 @@ da demo a mostra de volta). Apagar de verdade exige reescrever os arquivos
 por snapshot que nada sobrou.
 
 Uma implementação disso (rota, script e painel, com expurgo protegido por flag)
-foi escrita em 2026-10-09 na branch `review/opus-night`, mas nunca rodou contra
+foi escrita na branch de revisão de 2026-10-09 (commits db165e6/4614fea), mas nunca rodou contra
 a AWS real: a credencial estava expirada. Também não foi validado como o
 processor do ASP convive com OPTIMIZE/VACUUM feitos por outro motor na mesma
 tabela.

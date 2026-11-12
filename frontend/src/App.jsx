@@ -4,6 +4,7 @@ import AvisoAws from './components/AvisoAws'
 import CicloCdc from './components/CicloCdc'
 import Consultas from './components/Consultas'
 import TimeTravel from './components/TimeTravel'
+import { avisoDeModo } from './modo'
 
 export default function App() {
   const [visao, setVisao] = useState(null)
@@ -42,6 +43,7 @@ export default function App() {
   }, [icebergFora, carregar])
   const aws = preflight?.checks?.find((c) => c.item === 'Credencial AWS')
   const postImages = preflight?.checks?.find((c) => c.item === 'changeStreamPreAndPostImages')
+  const modo = avisoDeModo(preflight)
 
   // Duas divergências diferentes: tabela duplicada (total > ids) e propagação
   // pendente (contagens diferentes, mas sem duplicata). Dizer "duplicada" na
@@ -96,6 +98,12 @@ export default function App() {
         </div>
 
         {erro && <div className="notice bad"><strong>Backend indisponível.</strong> {erro}</div>}
+
+        {modo && (
+          <div className={`notice ${modo.classe}`} role="status">
+            <strong>{modo.titulo}</strong> {modo.texto}
+          </div>
+        )}
 
         {postImages?.estado === 'falha' && (
           <div className="notice warn">

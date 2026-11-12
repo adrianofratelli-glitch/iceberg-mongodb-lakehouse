@@ -17,6 +17,7 @@ backend/                    API FastAPI (porta 8250)
   tests/                    testes pytest (ver seção 6)
 frontend/                   React + Vite (porta 5250, proxy /api e /preflight para 8250: vite.config.js)
   src/App.jsx               tela única: topbar, cards das duas metades, seções colapsáveis
+  src/modo.js               faixa de modo a partir do /preflight (somente MongoDB / falha)
   src/api.js                cliente HTTP (um método por rota) e formatadores
   src/components/CicloCdc.jsx     botões INSERT/UPDATE/DELETE/CAMPO NOVO/Limpar + polling de propagação
   src/components/TimeTravel.jsx   lista de snapshots Iceberg e "pedido naquele snapshot"
@@ -53,12 +54,12 @@ Rotas em `backend/main.py`; cliente em `frontend/src/api.js:26-39`.
 
 | Tela / botão | Componente | Chamada HTTP | Handler | Função de negócio | Onde toca o MongoDB / AWS |
 |---|---|---|---|---|---|
-| Abrir a página (cards "duas metades", pill de estado) | `App.jsx:15-18` (`carregar`) | `GET /api/visao-geral` | `main.py:136` `visao_geral` | `mongo_side.py::overview` + `athena_side.py::counts` | Mongo: `count_documents`, 2x `aggregate` em `orders`, `count_documents` em `dlq` (`mongo_side.py:61-104`). Athena: `count(*)`/`count(DISTINCT _id)` (`athena_side.py:173`) |
-| Abrir a página (contagem de colunas) | `App.jsx:17` | `GET /api/schema` | `main.py:159` `schema` | `athena_side.py::table_columns` | Glue `get_table` (`athena_side.py:160`); sem Mongo |
-| Abrir a página (avisos de pré-requisito) | `App.jsx:22` | `GET /preflight` | `main.py:66` `preflight` (devolve `modo`/`resumo`) | `mongo_side.py::ping`, `post_images_enabled`, `dlq`; `athena_side.py::identity` | Mongo: `ping`, `list_collections` (`mongo_side.py:40`), `count_documents` em `dlq` |
-| Abrir a página (pill de lag do checkpoint) | `App.jsx:23, 80-86` | `GET /api/lag` | `main.py:273` `lag` | `lag_side.py::processor_lag` (`:136`) | Mongo: `find_one` ordenado por `$natural` em `local.oplog.rs` (`lag_side.py:119-121`) e `mongosh` externo `sp.<processor>.stats()` (`lag_side.py:41`) |
-| Reconsulta automática a cada 8 s quando o Iceberg está fora | `App.jsx:33-43` | as mesmas rotas acima | idem | idem | idem |
-| "Corrigir agora" (aviso post-images) | `App.jsx:105` | `POST /api/corrigir/post-images` | `main.py:288` `corrigir_post_images` | `mongo_side.py::enable_post_images` (`:52`) | Mongo: `collMod` com `changeStreamPreAndPostImages` em `orders` |
+| Abrir a página (cards "duas metades", pill de estado) | `App.jsx:16-19` (`carregar`) | `GET /api/visao-geral` | `main.py:136` `visao_geral` | `mongo_side.py::overview` + `athena_side.py::counts` | Mongo: `count_documents`, 2x `aggregate` em `orders`, `count_documents` em `dlq` (`mongo_side.py:61-104`). Athena: `count(*)`/`count(DISTINCT _id)` (`athena_side.py:173`) |
+| Abrir a página (contagem de colunas) | `App.jsx:18` | `GET /api/schema` | `main.py:159` `schema` | `athena_side.py::table_columns` | Glue `get_table` (`athena_side.py:160`); sem Mongo |
+| Abrir a página (avisos de pré-requisito) | `App.jsx:23` | `GET /preflight` | `main.py:66` `preflight` (devolve `modo`/`resumo`) | `mongo_side.py::ping`, `post_images_enabled`, `dlq`; `athena_side.py::identity` | Mongo: `ping`, `list_collections` (`mongo_side.py:40`), `count_documents` em `dlq` |
+| Abrir a página (pill de lag do checkpoint) | `App.jsx:24, 82-88` | `GET /api/lag` | `main.py:273` `lag` | `lag_side.py::processor_lag` (`:136`) | Mongo: `find_one` ordenado por `$natural` em `local.oplog.rs` (`lag_side.py:119-121`) e `mongosh` externo `sp.<processor>.stats()` (`lag_side.py:41`) |
+| Reconsulta automática a cada 8 s quando o Iceberg está fora | `App.jsx:34-44` | as mesmas rotas acima | idem | idem | idem |
+| "Corrigir agora" (aviso post-images) | `App.jsx:113` | `POST /api/corrigir/post-images` | `main.py:288` `corrigir_post_images` | `mongo_side.py::enable_post_images` (`:52`) | Mongo: `collMod` com `changeStreamPreAndPostImages` em `orders` |
 | INSERT | `CicloCdc.jsx:110-118` -> `executar` (`:73`) | `POST /api/demo/insert` | `main.py:190` `demo` | `mongo_side.py::demo_insert` (`:113`) | `replace_one(upsert)` em `orders` (`:129`) |
 | UPDATE | idem | `POST /api/demo/update` | idem | `mongo_side.py::demo_update` (`:133`) | `update_one` `$set` + `find_one` em `orders`; 409 se não existir |
 | DELETE | idem | `POST /api/demo/delete` | idem | `mongo_side.py::demo_delete` (`:143`) | `delete_one` em `orders` |
@@ -127,7 +128,7 @@ Consultas Athena (não são Mongo): `sql/01..08` e as de `backend/athena_side.py
 - Limiares do alerta de lag -> `backend/lag_side.py::processor_lag` (:136).
 - Tempo/limite do polling da UI -> `CicloCdc.jsx` (`LIMITE_TENTATIVAS`, `INTERVALO_MS`, :33-34).
 - Mudar porta -> `start.sh` (:35-71), `frontend/vite.config.js`, CORS em `backend/main.py:26`.
-- Estado da pill (convergido/propagando/duplicada) -> `frontend/src/App.jsx` (`estado`, :54).
+- Estado da pill (convergido/propagando/duplicada) -> `frontend/src/App.jsx` (`estado`, :56).
 - Máscara de erro -> `backend/main.py::safe_error` (:48).
 
 ## 6. Testes

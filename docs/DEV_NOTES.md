@@ -49,7 +49,7 @@ de boto3 e fastapi.
 3. Nome de campo com `.` ou `$` derruba o processor e **não** vai para a DLQ. O estágio de sanitização (`$function`) em `create_processor.js` renomeia antes do `$iceberg`; se `$function` não existir na versão do ASP, troque por `$project` explícito (ver nota no arquivo).
 4. `Decimal128` e conflito de tipo vão para a DLQ `iceberg_demo.dlq`. Valores monetários ficam `double`.
 5. O backend nunca escreve no Iceberg; quem alimenta a tabela é o processor.
-6. Tabela Iceberg sem `partitionedBy` explícito: o processor foi criado antes de o campo existir. Hoje o `$iceberg` aceita `partitionedBy` (o primeiro transform é sobre o `idFieldName`; sem o campo há transform padrão no id). Mudar exige drop da tabela e restart sem checkpoint; ver `docs/adr/0004-particionamento.md`.
+6. Tabela Iceberg sem `partitionedBy` explícito: o processor foi criado antes de o campo existir. Hoje o `$iceberg` aceita `partitionedBy` (o primeiro transform é sobre o `idFieldName`; sem o campo a doc diz haver transform padrão no id, a confirmar). Mudar exige drop da tabela e restart sem checkpoint; ver `docs/adr/0004-particionamento.md`.
 7. `/api/lag` (`backend/lag_side.py`) usa `mongosh --eval 'sp.<nome>.stats()'`, exige `STREAM_PROCESSING_URI` e leitura de `local.oplog.rs`; o parsing de `stats()` **não foi validado** contra workspace real — confira os nomes de campo antes de usar em demo.
 8. IDs de rota nunca são "limpos" em silêncio: pedido/consulta em allowlist, snapshot inteiro positivo limitado; fora do contrato → 422 antes de tocar MongoDB, Athena ou filesystem.
 9. Seed ancorado em `SEED_ANCHOR` fixo (padrão `2026-08-24T18:59:04Z`) porque o `_id` (`PED-AAAAMM-…`) carrega o mês. Mudar a âncora exige rodar `reset_demo.py` para remover os ids antigos.

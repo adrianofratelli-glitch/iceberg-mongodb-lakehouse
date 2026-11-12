@@ -6,8 +6,8 @@
 O processor foi criado em 2026-08 sem particionamento porque o estágio
 `$iceberg` não oferecia o campo. A doc atual oferece `partitionedBy` com 1 a 3
 transforms (`identity`, `year`, `month`, `day`, `hour`, `truncate`, `bucket`),
-o primeiro obrigatoriamente sobre o `idFieldName`, e aplica um transform padrão
-no id quando o campo é omitido. As perguntas de negócio da demo varrem a base
+o primeiro obrigatoriamente sobre o `idFieldName`, e diz aplicar um transform
+padrão no id quando o campo é omitido (a confirmar nos metadados desta tabela). As perguntas de negócio da demo varrem a base
 inteira (`sql/06_pergunta_de_negocio.sql` agrupa por UF e mês,
 `sql/07_top_produtos.sql` por produto), então particionar por id não reduz o
 que o Athena lê; só um filtro por período se beneficiaria de partição temporal.

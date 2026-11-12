@@ -77,25 +77,28 @@ Checked against the MongoDB docs and changelog on 2026-11-12.
 - **`$iceberg` is GA** in Atlas Stream Processing (changelog, 2026-06-30) and
   needs an SP10 or larger workspace tier. Catalogs: `glue` (S3 only) and
   `hadoop`; `unity` (Databricks) and `horizon` (Snowflake) were added on
-  2026-11-04 and are not used here (`unity` only supports `mode: "insert"`, not
-  CDC).
+  2026-11-04 (release label to be confirmed) and are not used here. The
+  `$iceberg` reference page says `unity` only supports `mode: "insert"`, not
+  CDC (to be confirmed).
 - **This demo uses the Glue catalog on S3 and Athena.** Other engines that read
   Glue (Spark, Trino, Snowflake) should see the same table; that is not
   exercised here.
 - **No explicit partitioning.** The processor was created before
-  `partitionedBy` was available; current docs apply a default transform on the
-  id column when it is omitted. Changing it means dropping and rebuilding the
+  `partitionedBy` was available. The current reference page says that, when it
+  is omitted, a default transform is applied on the id column (to be
+  confirmed against this table's metadata). Changing it means dropping and rebuilding the
   table, so it is left as a recorded experiment
   ([ADR 0004](docs/adr/0004-particionamento.md)).
 - **Latency is measured, not promised.** The numbers above are from
   2026-08-24. `backend/lake_probe.py` re-measures the whole circuit (write →
   processor → Iceberg → Athena) with p50/p95; it needs AWS credentials and a
   running processor.
-- **Deletes are not erasure** (see step 3 above). Compaction and snapshot
-  expiry are not configured by the processor.
-- Without AWS credentials the UI and `/preflight` switch to MongoDB-only mode
-  (`"modo": "somente_mongodb"`): writes still go to Atlas, and nothing claims
-  they reached the lake.
+- **Deletes are not erasure** (see step 3 above). Snapshot expiry is not
+  configured here; the stage's own compaction behaviour was not checked.
+- Without AWS credentials `/preflight` reports MongoDB-only mode
+  (`"modo": "somente_mongodb"` plus a `resumo`) and the UI shows that summary
+  as a banner: writes still go to Atlas, and nothing claims they reached the
+  lake.
 
 Design decisions are in [`docs/adr/`](docs/adr/).
 
