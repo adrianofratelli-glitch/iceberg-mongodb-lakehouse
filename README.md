@@ -44,9 +44,11 @@ step that matters: an append-only lake would need a partition rewrite.
 
 ![The same order showing EM_TRANSPORTE and the new amount, reflected in 35 seconds](docs/screenshots/03-update-refletido.png)
 
-Delete works the same way — the row disappears from the table. For regulated
-industries that is the right-to-be-forgotten reaching the lake without a
-compaction job.
+Delete works the same way — the row disappears from the current version of the
+table. It is not erasure: older snapshots still hold the row (step 4 brings it
+back), until they are expired and their files removed. Right-to-be-forgotten in
+the lake needs snapshot expiry on top of this; see
+[ADR 0003](docs/adr/0003-rtbf-fora-da-main.md).
 
 ### 4. Time travel comes free with the format
 
@@ -67,6 +69,35 @@ A new field (`fraudScore`) becomes a column in the Glue catalogue with no
 migration, and older rows read as `NULL`.
 
 ---
+
+## Status and limits
+
+Checked against the MongoDB docs and changelog on 2026-11-12.
+
+- **`$iceberg` is GA** in Atlas Stream Processing (changelog, 2026-06-30) and
+  needs an SP10 or larger workspace tier. Catalogs: `glue` (S3 only) and
+  `hadoop`; `unity` (Databricks) and `horizon` (Snowflake) were added on
+  2026-11-04 and are not used here (`unity` only supports `mode: "insert"`, not
+  CDC).
+- **This demo uses the Glue catalog on S3 and Athena.** Other engines that read
+  Glue (Spark, Trino, Snowflake) should see the same table; that is not
+  exercised here.
+- **No explicit partitioning.** The processor was created before
+  `partitionedBy` was available; current docs apply a default transform on the
+  id column when it is omitted. Changing it means dropping and rebuilding the
+  table, so it is left as a recorded experiment
+  ([ADR 0004](docs/adr/0004-particionamento.md)).
+- **Latency is measured, not promised.** The numbers above are from
+  2026-08-24. `backend/lake_probe.py` re-measures the whole circuit (write →
+  processor → Iceberg → Athena) with p50/p95; it needs AWS credentials and a
+  running processor.
+- **Deletes are not erasure** (see step 3 above). Compaction and snapshot
+  expiry are not configured by the processor.
+- Without AWS credentials the UI and `/preflight` switch to MongoDB-only mode
+  (`"modo": "somente_mongodb"`): writes still go to Atlas, and nothing claims
+  they reached the lake.
+
+Design decisions are in [`docs/adr/`](docs/adr/).
 
 ## Setup
 
@@ -179,6 +210,22 @@ Run on 2026-10-06 from a laptop to the Atlas cluster (includes the write
 round trip): p50 419 ms / p95 445 ms for insert, 418 / 460 ms for update,
 425 / 447 ms for delete (30 samples each); resume delivered 30/30 missed
 events with 0 duplicates; 100 concurrent updates arrived in order.
+
+## Measuring the whole circuit
+
+```bash
+# needs AWS credentials and the processor reading the target database
+ALLOW_DEMO_DB_WRITE=1 backend/venv/bin/python backend/lake_probe.py --samples 10
+LIVE_LAKE=1 ALLOW_DEMO_DB_WRITE=1 backend/venv/bin/pytest -q backend/tests/test_live_lake_convergence.py
+```
+
+Each sample inserts, updates and deletes a `PED-PROBE-*` order and polls Athena
+until the table reflects each step. The reported time is an upper bound (its
+resolution is the polling interval plus one Athena query); the summary also
+reports the bytes Athena scanned. Without AWS credentials it exits with code 2
+before writing anything; a database that does not end in `_test` needs
+`ALLOW_DEMO_DB_WRITE=1`. Not re-run since 2026-08-24 (AWS credentials expired):
+the first run after renewal should be recorded here.
 
 ## Adversarial tests
 

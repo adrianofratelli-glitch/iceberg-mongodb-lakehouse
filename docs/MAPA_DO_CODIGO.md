@@ -11,6 +11,7 @@ backend/                    API FastAPI (porta 8250)
   main.py                   todas as rotas + safe_error (mascara URI/host/ID AWS antes de ir ao navegador)
   mongo_side.py             tudo que fala com o Atlas (pymongo): visão geral, find, as 4 operações da demo, reset
   athena_side.py            tudo que fala com a AWS: Athena (SQL), Glue (colunas), retry, credencial recarregada a cada chamada
+  lake_probe.py             sonda ponta a ponta: escrita no Mongo -> linha no Athena (p50/p95, bytes escaneados)
   lag_side.py               distância checkpoint do processor x janela do oplog (usa mongosh + local.oplog.rs)
   settings.py               lê o .env da raiz (nomes de banco, bucket, workgroup, IDs dos pedidos ao vivo)
   tests/                    testes pytest (ver seção 6)
@@ -52,23 +53,23 @@ Rotas em `backend/main.py`; cliente em `frontend/src/api.js:26-39`.
 
 | Tela / botão | Componente | Chamada HTTP | Handler | Função de negócio | Onde toca o MongoDB / AWS |
 |---|---|---|---|---|---|
-| Abrir a página (cards "duas metades", pill de estado) | `App.jsx:15-18` (`carregar`) | `GET /api/visao-geral` | `main.py:122` `visao_geral` | `mongo_side.py::overview` + `athena_side.py::counts` | Mongo: `count_documents`, 2x `aggregate` em `orders`, `count_documents` em `dlq` (`mongo_side.py:61-104`). Athena: `count(*)`/`count(DISTINCT _id)` (`athena_side.py:173`) |
-| Abrir a página (contagem de colunas) | `App.jsx:17` | `GET /api/schema` | `main.py:145` `schema` | `athena_side.py::table_columns` | Glue `get_table` (`athena_side.py:160`); sem Mongo |
-| Abrir a página (avisos de pré-requisito) | `App.jsx:22` | `GET /preflight` | `main.py:66` `preflight` | `mongo_side.py::ping`, `post_images_enabled`, `dlq`; `athena_side.py::identity` | Mongo: `ping`, `list_collections` (`mongo_side.py:40`), `count_documents` em `dlq` |
-| Abrir a página (pill de lag do checkpoint) | `App.jsx:23, 80-86` | `GET /api/lag` | `main.py:253` `lag` | `lag_side.py::processor_lag` (`:136`) | Mongo: `find_one` ordenado por `$natural` em `local.oplog.rs` (`lag_side.py:119-121`) e `mongosh` externo `sp.<processor>.stats()` (`lag_side.py:41`) |
+| Abrir a página (cards "duas metades", pill de estado) | `App.jsx:15-18` (`carregar`) | `GET /api/visao-geral` | `main.py:136` `visao_geral` | `mongo_side.py::overview` + `athena_side.py::counts` | Mongo: `count_documents`, 2x `aggregate` em `orders`, `count_documents` em `dlq` (`mongo_side.py:61-104`). Athena: `count(*)`/`count(DISTINCT _id)` (`athena_side.py:173`) |
+| Abrir a página (contagem de colunas) | `App.jsx:17` | `GET /api/schema` | `main.py:159` `schema` | `athena_side.py::table_columns` | Glue `get_table` (`athena_side.py:160`); sem Mongo |
+| Abrir a página (avisos de pré-requisito) | `App.jsx:22` | `GET /preflight` | `main.py:66` `preflight` (devolve `modo`/`resumo`) | `mongo_side.py::ping`, `post_images_enabled`, `dlq`; `athena_side.py::identity` | Mongo: `ping`, `list_collections` (`mongo_side.py:40`), `count_documents` em `dlq` |
+| Abrir a página (pill de lag do checkpoint) | `App.jsx:23, 80-86` | `GET /api/lag` | `main.py:273` `lag` | `lag_side.py::processor_lag` (`:136`) | Mongo: `find_one` ordenado por `$natural` em `local.oplog.rs` (`lag_side.py:119-121`) e `mongosh` externo `sp.<processor>.stats()` (`lag_side.py:41`) |
 | Reconsulta automática a cada 8 s quando o Iceberg está fora | `App.jsx:33-43` | as mesmas rotas acima | idem | idem | idem |
-| "Corrigir agora" (aviso post-images) | `App.jsx:105` | `POST /api/corrigir/post-images` | `main.py:268` `corrigir_post_images` | `mongo_side.py::enable_post_images` (`:52`) | Mongo: `collMod` com `changeStreamPreAndPostImages` em `orders` |
-| INSERT | `CicloCdc.jsx:110-118` -> `executar` (`:73`) | `POST /api/demo/insert` | `main.py:176` `demo` | `mongo_side.py::demo_insert` (`:113`) | `replace_one(upsert)` em `orders` (`:129`) |
+| "Corrigir agora" (aviso post-images) | `App.jsx:105` | `POST /api/corrigir/post-images` | `main.py:288` `corrigir_post_images` | `mongo_side.py::enable_post_images` (`:52`) | Mongo: `collMod` com `changeStreamPreAndPostImages` em `orders` |
+| INSERT | `CicloCdc.jsx:110-118` -> `executar` (`:73`) | `POST /api/demo/insert` | `main.py:190` `demo` | `mongo_side.py::demo_insert` (`:113`) | `replace_one(upsert)` em `orders` (`:129`) |
 | UPDATE | idem | `POST /api/demo/update` | idem | `mongo_side.py::demo_update` (`:133`) | `update_one` `$set` + `find_one` em `orders`; 409 se não existir |
 | DELETE | idem | `POST /api/demo/delete` | idem | `mongo_side.py::demo_delete` (`:143`) | `delete_one` em `orders` |
 | CAMPO NOVO | idem | `POST /api/demo/schema` | idem | `mongo_side.py::demo_schema_field` (`:148`) | `replace_one(upsert)` do `PED-AOVIVO-002` com `fraudScore` (`:162`) |
-| Limpar | `CicloCdc.jsx:121` -> `resetar` (`:89`) | `POST /api/demo/reset` | `main.py:176` `demo` | `mongo_side.py::demo_reset` (`:166`) | `delete_many` dos 2 IDs ao vivo + `count_documents` em `orders` |
-| Polling após cada operação (a cada 3 s, até 40x) | `CicloCdc.jsx:34-60` (`esperarPropagacao`) | `GET /api/pedido/{order_id}` | `main.py:154` `pedido` | `mongo_side.py::find_order` + `athena_side.py::find_order` | Mongo `find_one` por `_id` (`mongo_side.py:108`); Athena `SELECT ... WHERE _id` (`athena_side.py:187`) |
-| "Ver query / chamada executada" | `QueryDetails.jsx` (usa `query_details` da resposta do `demo`) | nenhuma (dado vem da resposta do passo acima) | `main.py:236-250` monta `query_details` | texto montado em `main.py:209-235` (espelha as chamadas reais) | só exibição |
-| Time travel: abrir a seção | `TimeTravel.jsx:13-21` (`carregar`) | `GET /api/snapshots` | `main.py:281` `snapshots` | `athena_side.py::snapshots` (`:195`) | Athena em `"orders$snapshots"`; sem Mongo |
-| Time travel: clicar numa linha | `TimeTravel.jsx:23` (`consultar`) | `GET /api/snapshots/{snapshot_id}/pedido/{order_id}` | `main.py:289` `pedido_no_snapshot` | `athena_side.py::order_at_snapshot` (`:205`) | Athena `FOR VERSION AS OF`; sem Mongo |
-| Consultas analíticas: abrir a seção | `Consultas.jsx:13-15` | `GET /api/consultas` | `main.py:302` `consultas` | lista `sql/*.sql` (`_titulo`, `main.py:312`) | nenhum |
-| Consultas analíticas: botão de cada consulta | `Consultas.jsx:17` (`rodar`), botão `:38` | `POST /api/consultas/{id}` | `main.py:319` `rodar_consulta` | `athena_side.py::run_query` (`:75`) com o SQL do arquivo | Athena; sem Mongo |
+| Limpar | `CicloCdc.jsx:121` -> `resetar` (`:89`) | `POST /api/demo/reset` | `main.py:190` `demo` | `mongo_side.py::demo_reset` (`:166`) | `delete_many` dos 2 IDs ao vivo + `count_documents` em `orders` |
+| Polling após cada operação (a cada 3 s, até 40x) | `CicloCdc.jsx:34-60` (`esperarPropagacao`) | `GET /api/pedido/{order_id}` | `main.py:168` `pedido` | `mongo_side.py::find_order` + `athena_side.py::find_order` | Mongo `find_one` por `_id` (`mongo_side.py:108`); Athena `SELECT ... WHERE _id` (`athena_side.py:187`) |
+| "Ver query / chamada executada" | `QueryDetails.jsx` (usa `query_details` da resposta do `demo`) | nenhuma (dado vem da resposta do passo acima) | `main.py:255-271` monta `query_details` | texto montado em `main.py:228-254` (espelha as chamadas reais) | só exibição |
+| Time travel: abrir a seção | `TimeTravel.jsx:13-21` (`carregar`) | `GET /api/snapshots` | `main.py:301` `snapshots` | `athena_side.py::snapshots` (`:195`) | Athena em `"orders$snapshots"`; sem Mongo |
+| Time travel: clicar numa linha | `TimeTravel.jsx:23` (`consultar`) | `GET /api/snapshots/{snapshot_id}/pedido/{order_id}` | `main.py:309` `pedido_no_snapshot` | `athena_side.py::order_at_snapshot` (`:205`) | Athena `FOR VERSION AS OF`; sem Mongo |
+| Consultas analíticas: abrir a seção | `Consultas.jsx:13-15` | `GET /api/consultas` | `main.py:322` `consultas` | lista `sql/*.sql` (`_titulo`, `main.py:332`) | nenhum |
+| Consultas analíticas: botão de cada consulta | `Consultas.jsx:17` (`rodar`), botão `:38` | `POST /api/consultas/{id}` | `main.py:339` `rodar_consulta` | `athena_side.py::run_query` (`:75`) com o SQL do arquivo | Athena; sem Mongo |
 
 Observação: não há upload, chat nem rota de login. Os botões de "reset completo com 5.000 pedidos" só existem na linha de comando (`scripts/reset_demo.py`); o "Limpar" da UI remove só os 2 pedidos ao vivo.
 
@@ -96,6 +97,7 @@ Levantamento completo com texto das queries: [briefing/queries.md](briefing/quer
 | Inspeção da DLQ | `scripts/preflight.py` (:120) | `find().limit(3)` | `dlq` |
 | Operações manuais CLI | `scripts/insert_order.py`, `update_order.py`, `delete_order.py`, `add_schema_field.py`, `live_demo.py` | `find_one`/`delete_one`/`insert`/`update_one` | `orders` |
 | Medição de CDC | `scripts/cdc_probe.py` (:56 cria coleção com post-images; :72-74, :95, :105, :128, :150) | change stream + escritas de teste | coleção de sonda em `iceberg_demo_test` |
+| Medição ponta a ponta | `backend/lake_probe.py::run_sample` (escritas) e `::wait_until` (polling) | `insert_one`/`update_one`/`delete_one` por `_id` `PED-PROBE-*` + `athena_side.py::find_order` | `orders` do banco alvo (demo só com `ALLOW_DEMO_DB_WRITE=1`) -> tabela Iceberg |
 | Change stream do processor (CDC real) | `stream-processing/create_processor.js` (`$source` :161; `$match` :174; `$replaceRoot` :181; sanitização `$function` :129; `$iceberg` :199; `createStreamProcessor` :220) | `$source` com `initialSync` e `fullDocument: "required"` -> `$iceberg` | `iceberg_demo.orders` -> S3/Glue |
 
 Consultas Athena (não são Mongo): `sql/01..08` e as de `backend/athena_side.py` (`counts` :173, `find_order` :187, `snapshots` :195, `order_at_snapshot` :205, `drop_table` :147).
@@ -115,9 +117,9 @@ Consultas Athena (não são Mongo): `sql/01..08` e as de `backend/athena_side.py
 ## 5. "Quero mexer em..."
 
 - Texto/botões do ciclo CDC -> `frontend/src/components/CicloCdc.jsx` (`PASSOS`, linha 6).
-- O pedido que o INSERT/UPDATE cria (campos, valores) -> `backend/mongo_side.py::demo_insert` (:113) e `demo_update` (:133); e o espelho exibido em `backend/main.py:209-235` (`calls`).
+- O pedido que o INSERT/UPDATE cria (campos, valores) -> `backend/mongo_side.py::demo_insert` (:113) e `demo_update` (:133); e o espelho exibido em `backend/main.py:228-254` (`calls`).
 - Os IDs dos pedidos ao vivo -> `backend/settings.py` (`LIVE_ORDER_ID`, `SCHEMA_ORDER_ID`); a UI repete `PED-AOVIVO-001` em `TimeTravel.jsx:27`.
-- Uma consulta analítica -> edite o arquivo em `sql/` (aparece sozinha na UI; título = primeiro comentário `--`). Rota: `backend/main.py:302-337`.
+- Uma consulta analítica -> edite o arquivo em `sql/` (aparece sozinha na UI; título = primeiro comentário `--`). Rota: `backend/main.py:322-357`.
 - Adicionar uma rota -> `backend/main.py` + método em `frontend/src/api.js:26`.
 - Query do card MongoDB -> `backend/mongo_side.py::overview` (:61).
 - Quantidade/formato do seed -> `scripts/seed_orders.py` (`SEED_COUNT`, âncora de data em `DEFAULT_ANCHOR`).
@@ -138,4 +140,6 @@ Comandos (do README, "Adversarial tests"): `backend/venv/bin/pytest -q backend/t
 - `backend/tests/test_credentials_refresh.py` — credencial nova no arquivo vale sem reiniciar.
 - `backend/tests/test_retry_identity.py` — retry do Athena reaproveita a identidade da execução.
 - `backend/tests/test_live_cdc_adversarial.py` — (live) duplo clique idempotente, schema drift, chaves com ponto/unicode, documento perto do limite.
+- `backend/tests/test_lake_probe.py` — sonda ponta a ponta com relógio/Athena falsos (convergência, timeout, limpeza em falha, recusa do banco da demo e sem AWS) e respostas da demo/preflight que não afirmam propagação.
+- `backend/tests/test_live_lake_convergence.py` — (live, `LIVE_LAKE=1`) uma amostra INSERT/UPDATE/DELETE até o Athena; exige AWS e processor lendo o banco alvo.
 - `frontend/tests/http-deadline.test.mjs` — prazo das requisições do `api.js`.

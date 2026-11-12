@@ -208,10 +208,10 @@ const pipeline = [
       catalog: {
         type: "glue"
       }
-      // partitionBy: not supported by $iceberg in the ASP version this demo
-      // was built against -- verified against docs as of 2026-09; see
-      // docs/TROUBLESHOOTING.md and README for the note. Revisit if the
-      // feature ships.
+      // No explicit partitionedBy: the field did not exist when this processor
+      // was created (2026-08). Current $iceberg docs accept it (first
+      // transform must be on idFieldName). Adding it means dropping and
+      // rebuilding the table; see docs/adr/0004-particionamento.md.
     }
   }
 ];

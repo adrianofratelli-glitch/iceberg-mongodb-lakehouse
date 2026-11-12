@@ -38,7 +38,7 @@ Componentes de apoio reutilizados em várias seções:
 Ao montar, dispara em paralelo:
 - `GET /api/visao-geral` → estado dos dois lados (Mongo/Iceberg).
 - `GET /api/schema` → contagem de colunas no catálogo Glue.
-- `GET /preflight` → checagens de saúde (conexão, post-images, DLQ, credencial AWS).
+- `GET /preflight` → checagens de saúde (conexão, post-images, DLQ, credencial AWS), mais `modo` (`completo`, `somente_mongodb`, `com_falha`) e `resumo` em texto.
 - `GET /api/lag` → distância do checkpoint do processor até a janela do oplog.
 
 A pill de estado no topo (`estado`, linhas 39-49 de `App.jsx`) classifica em:
@@ -62,7 +62,9 @@ botão "Limpar" (reset). Cada clique:
 
 1. Chama `POST /api/demo/{insert|update|delete|schema}`.
 2. Mostra o documento MongoDB resultante e os detalhes da query/operação
-   (`QueryDetails`).
+   (`QueryDetails`). A mensagem só afirma o commit no MongoDB; a resposta traz
+   `propagacao: "aguardando_confirmacao"` e a confirmação do Iceberg vem do
+   passo 3. O botão DELETE avisa que snapshots antigos ainda guardam a linha.
 3. Entra em polling (`esperarPropagacao`, a cada 3s, até 40 tentativas = 2min)
    chamando `GET /api/pedido/{id}` até o lado Iceberg refletir a mudança
    esperada (linha existir/sumir, status bater no caso de update).

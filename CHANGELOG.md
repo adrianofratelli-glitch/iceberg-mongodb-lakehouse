@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- `backend/lake_probe.py`: mede o circuito MongoDB → processor → Iceberg → Athena (p50/p95, timeouts, bytes escaneados); teste live `LIVE_LAKE=1`.
+- `POST /api/demo/{op}` só afirma o commit no MongoDB (`propagacao: "aguardando_confirmacao"`); `/preflight` ganha `modo` e `resumo`.
+- README: status GA do `$iceberg`, catálogos, particionamento e limites; DELETE deixa de ser apresentado como direito ao esquecimento.
+- ADRs 0001–0005 em `docs/adr/`.
+
 - Reorganização: `config.py` saiu da raiz para `scripts/` (só os scripts o usam).
 - Atualiza dependências compatíveis e pisos de segurança; alinha metadados de versão entre aplicação e frontend.
 

@@ -53,7 +53,8 @@ python scripts/delete_order.py
 
 Run `sql/04_validate_delete.sql`.
 
-Message: **The operational delete is reflected in the Iceberg table.**
+Message: **The operational delete is reflected in the current version of the Iceberg table.**
+Do not call it erasure: older snapshots still hold the row until they expire (the time travel step shows it).
 
 ### 5. Schema evolution
 

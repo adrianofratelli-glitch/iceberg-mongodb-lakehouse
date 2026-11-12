@@ -81,9 +81,12 @@ Documentos rejeitados por `$iceberg` (ex.: `Decimal128`, conflito de tipo)
 vão para a dead-letter queue `iceberg_demo.dlq`, configurada na criação do
 processor (`dlq: { connectionName, db, coll }`).
 
-**Limitação conhecida:** a versão do ASP usada aqui não expõe `partitionBy`
-no estágio `$iceberg` — a tabela não é particionada, Athena sempre varre o
-dataset inteiro. Documentado no README.
+**Particionamento:** o processor foi criado (2026-08) sem `partitionedBy`,
+que não existia no estágio. A doc atual do `$iceberg` aceita `partitionedBy`
+(1 a 3 transforms, o primeiro sobre o `idFieldName`) e aplica um transform
+padrão no id quando o campo é omitido. As consultas de negócio agrupam a base
+inteira, então varrem a tabela toda de qualquer forma. Mudar exige drop da tabela e
+restart sem checkpoint: registrado em `docs/adr/0004-particionamento.md`.
 
 ### 3. Iceberg + Glue + Athena
 Tabela Iceberg em S3, catalogada no Glue (`GLUE_DATABASE.ICEBERG_TABLE`,
@@ -151,9 +154,14 @@ deletes 30–60s.
   (insert, não upsert). `stream-processing/rebuild_table.py --auto-rebuild`
   automatiza o `DROP TABLE` via Athena antes do restart; sem a flag de
   ambiente o restart simplesmente recusa rodar.
-- **Sem particionamento na tabela Iceberg.** Não é decisão de design — é
-  limitação da versão do `$iceberg` do ASP usada aqui (sem `partitionBy`
-  documentado). Fica registrado para não ser confundido com escolha.
+- **Sem `partitionedBy` explícito.** Na criação do processor o campo não
+  existia; hoje existe, e a troca fica como experimento registrado
+  (`docs/adr/0004-particionamento.md`) porque exige reconstruir a tabela.
+- **Resposta da demo só afirma o commit no MongoDB.** `POST /api/demo/{op}`
+  devolve `propagacao: "aguardando_confirmacao"`; a chegada no Iceberg só é
+  confirmada lendo a linha no Athena (UI ou `backend/lake_probe.py`).
+  `/preflight` devolve `modo` (`completo`, `somente_mongodb`, `com_falha`) e
+  `resumo` (`docs/adr/0005-propagacao-so-confirmada-no-athena.md`).
 - **Credencial AWS renovada sem reiniciar.** `athena_side._client()` cria
   uma `boto3` Session nova a cada chamada, então credencial nova em
   `~/.aws/credentials` vale na requisição seguinte; enquanto o lado Iceberg
@@ -186,7 +194,12 @@ processor. Recriar a tabela do zero é o caminho destrutivo separado
 Escrita em banco que não termina em `_test` exige `ALLOW_DEMO_DB_WRITE=1`.
 Testes e medições usam `iceberg_demo_test` (`DATABASE_NAME` no ambiente vence
 o `.env`). `scripts/cdc_probe.py` mede, nesse banco, a perna escrita → evento
-do change stream e a retomada por resume token.
+do change stream e a retomada por resume token. `backend/lake_probe.py` mede
+o circuito inteiro (escrita → processor → Iceberg → Athena) com ids
+`PED-PROBE-*`, apagados no fim; como o processor lê o banco da demo, uma
+medição real exige `ALLOW_DEMO_DB_WRITE=1` e credencial AWS (sem ela, sai com
+código 2 sem gravar nada). O teste `backend/tests/test_live_lake_convergence.py`
+roda uma amostra com `LIVE_LAKE=1`.
 
 ## Onde continuar
 
@@ -195,3 +208,5 @@ do change stream e a retomada por resume token.
 - `docs/TROUBLESHOOTING.md` — nove falhas reais já encontradas, com sintoma e
   cura.
 - `docs/DEV_NOTES.md` — notas de desenvolvimento.
+- `docs/adr/` — decisões de arquitetura (ASP vs Debezium, dois venvs, RTBF,
+  particionamento, confirmação da propagação).

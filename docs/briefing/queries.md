@@ -169,6 +169,17 @@ Lista até 3 documentos rejeitados pelo processor (`iceberg_demo.dlq`) para
 mostrar motivo (`errInfo.reason`) e `_id` do documento problemático antes de
 cada demo.
 
+### `backend/lake_probe.py::run_sample` — sonda ponta a ponta
+```python
+coll.insert_one(probe_document(order_id))                                 # _id PED-PROBE-<run>-<n>
+coll.update_one({"_id": order_id}, {"$set": {"status": "EM_TRANSPORTE"}})
+coll.delete_one({"_id": order_id})                                        # também no finally
+```
+Cada escrita é seguida de polling em `athena_side.find_order` (`SELECT _id,
+status, ... WHERE _id = '<id>'`) até a linha aparecer, mudar de status ou
+sumir. Tudo por `_id` (índice único nativo). Recusa banco que não termina em
+`_test` sem `ALLOW_DEMO_DB_WRITE=1` e não grava nada sem credencial AWS.
+
 ## Consultas analíticas — Athena / Iceberg (`sql/`)
 
 Executadas via `backend/athena_side.py:run_query` (com retry curto em erro
