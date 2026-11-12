@@ -38,7 +38,7 @@ Componentes de apoio reutilizados em várias seções:
 Ao montar, dispara em paralelo:
 - `GET /api/visao-geral` → estado dos dois lados (Mongo/Iceberg).
 - `GET /api/schema` → contagem de colunas no catálogo Glue.
-- `GET /preflight` → checagens de saúde (conexão, post-images, DLQ, credencial AWS), mais `modo` (`completo`, `somente_mongodb`, `com_falha`) e `resumo` em texto. Fora do modo `completo`, `App.jsx` mostra o `resumo` numa faixa (`frontend/src/modo.js::avisoDeModo`).
+- `GET /preflight` → checagens de saúde (conexão, post-images, DLQ, credencial AWS), mais `modo` (`completo`, `somente_mongodb`, `com_falha`) e `resumo` em texto. Fora do modo `completo`, `App.jsx` mostra o `resumo` numa faixa (`frontend/src/modo.js::avisoDeModo`); no modo `somente_mongodb` a faixa fica escondida enquanto o card do Iceberg mostra o `AvisoAws`, que já diz a mesma coisa.
 - `GET /api/lag` → distância do checkpoint do processor até a janela do oplog.
 
 A pill de estado no topo (`estado`, linhas 56-66 de `App.jsx`) classifica em:

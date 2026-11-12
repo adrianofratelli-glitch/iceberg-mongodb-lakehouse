@@ -43,7 +43,9 @@ export default function App() {
   }, [icebergFora, carregar])
   const aws = preflight?.checks?.find((c) => c.item === 'Credencial AWS')
   const postImages = preflight?.checks?.find((c) => c.item === 'changeStreamPreAndPostImages')
-  const modo = avisoDeModo(preflight)
+  // Mesmo critério do card do Iceberg, que mostra o AvisoAws quando a tabela
+  // não está disponível depois de carregar a visão geral.
+  const modo = avisoDeModo(preflight, { avisoAwsVisivel: Boolean(visao) && !iceberg?.disponivel })
 
   // Duas divergências diferentes: tabela duplicada (total > ids) e propagação
   // pendente (contagens diferentes, mas sem duplicata). Dizer "duplicada" na

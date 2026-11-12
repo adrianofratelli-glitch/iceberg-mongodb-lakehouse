@@ -96,9 +96,9 @@ Checked against the MongoDB docs and changelog on 2026-11-12.
 - **Deletes are not erasure** (see step 3 above). Snapshot expiry is not
   configured here; the stage's own compaction behaviour was not checked.
 - Without AWS credentials `/preflight` reports MongoDB-only mode
-  (`"modo": "somente_mongodb"` plus a `resumo`) and the UI shows that summary
-  as a banner: writes still go to Atlas, and nothing claims they reached the
-  lake.
+  (`"modo": "somente_mongodb"` plus a `resumo`) and the UI says the AWS
+  credential is missing while the MongoDB side keeps working: writes still go
+  to Atlas, and nothing claims they reached the lake.
 
 Design decisions are in [`docs/adr/`](docs/adr/).
 
