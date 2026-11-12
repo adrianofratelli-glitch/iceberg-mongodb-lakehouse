@@ -6,7 +6,7 @@ import QueryDetails from './QueryDetails'
 const PASSOS = [
   { op: 'insert', rotulo: 'INSERT', descricao: 'Pedido novo entra pelo caminho transacional.' },
   { op: 'update', rotulo: 'UPDATE', descricao: 'Data lake append-only não faria isso sem reescrever partição.' },
-  { op: 'delete', rotulo: 'DELETE', descricao: 'A linha some do lake. Direito ao esquecimento atravessa o circuito.' },
+  { op: 'delete', rotulo: 'DELETE', descricao: 'A linha some da versão atual do lake; snapshots antigos a guardam até expirar (veja o time travel).' },
   { op: 'schema', rotulo: 'CAMPO NOVO', descricao: 'fraudScore vira coluna sem ALTER TABLE.' },
 ]
 

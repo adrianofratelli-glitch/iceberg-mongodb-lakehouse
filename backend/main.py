@@ -75,14 +75,14 @@ def preflight():
     except Exception as exc:  # noqa: BLE001
         ok = False
         checks.append({"item": "Conexão com o Atlas", "estado": "falha", "detalhe": safe_error(exc, 200)})
-        return {"ok": False, "checks": checks}
+        return {"ok": False, "modo": "com_falha", "resumo": "O lado MongoDB tem falha: corrija antes da demo.", "checks": checks}
 
     try:
         images = mongo_side.post_images_enabled()
         dlq = mongo_side.dlq().count_documents({})
     except Exception as exc:  # noqa: BLE001 -- connection dropped after the ping
         checks.append({"item": "Coleção de origem", "estado": "falha", "detalhe": safe_error(exc, 200)})
-        return {"ok": False, "checks": checks}
+        return {"ok": False, "modo": "com_falha", "resumo": "O lado MongoDB tem falha: corrija antes da demo.", "checks": checks}
 
     if images is True:
         checks.append({"item": "changeStreamPreAndPostImages", "estado": "ok"})
@@ -116,7 +116,21 @@ def preflight():
         }
     )
 
-    return {"ok": ok, "checks": checks}
+    # `ok` fala só do lado MongoDB (o que quebra o processor). O modo diz se a
+    # demo inteira está de pé: sem AWS, nada do Iceberg pode ser confirmado.
+    if ok and aws["disponivel"]:
+        modo, resumo = "completo", "Demo completa: MongoDB e Iceberg disponíveis."
+    elif ok:
+        modo = "somente_mongodb"
+        resumo = (
+            "Modo somente MongoDB: INSERT, UPDATE, DELETE e CAMPO NOVO gravam no Atlas, "
+            "mas o Iceberg, o time travel e as consultas analíticas ficam indisponíveis e "
+            "nenhuma propagação é confirmada até a credencial AWS voltar (vale na próxima "
+            "requisição, sem reiniciar)."
+        )
+    else:
+        modo, resumo = "com_falha", "O lado MongoDB tem falha: corrija antes da demo."
+    return {"ok": ok, "modo": modo, "resumo": resumo, "checks": checks}
 
 
 @app.get("/api/visao-geral")
@@ -193,12 +207,17 @@ def demo(operacao: str):
 
     if isinstance(resultado, dict) and "orderDate" in resultado:
         resultado = {**resultado, "orderDate": str(resultado["orderDate"])}
+    # A resposta só pode afirmar o que o backend verificou: o commit no MongoDB.
+    # A chegada no Iceberg depende do processor e só é confirmada lendo a linha
+    # de volta no Athena (a UI faz isso e cronometra; backend/lake_probe.py mede).
     mensagens = {
-        "insert": "Pedido inserido no MongoDB. O change stream já levou o evento adiante.",
-        "update": "Pedido atualizado. Data lake append-only não faria isso sem reescrever partição.",
-        "delete": "Pedido removido. Acompanhe a linha sumir do Iceberg.",
-        "schema": "Pedido com campo novo. O Iceberg evolui o schema sozinho.",
-        "reset": "Documentos da demo removidos.",
+        "insert": "Pedido gravado no MongoDB. Chegada no Iceberg: aguardando confirmação no Athena.",
+        "update": "Pedido atualizado no MongoDB. Aguardando a linha refletir no Iceberg "
+        "(um lake só de append exigiria reescrever arquivos).",
+        "delete": "Pedido removido do MongoDB. Aguardando a linha sumir da versão atual do Iceberg; "
+        "snapshots anteriores ainda a guardam até expirarem.",
+        "schema": "Pedido com campo novo gravado no MongoDB. Aguardando a coluna aparecer no Iceberg.",
+        "reset": "Documentos da demo removidos do MongoDB.",
     }
     ids = {
         "insert": settings.LIVE_ORDER_ID,
@@ -237,6 +256,7 @@ def demo(operacao: str):
         "operacao": operacao,
         "documento": resultado,
         "mensagem": mensagens[operacao],
+        "propagacao": "aguardando_confirmacao",
         "query_details": {
             "operation": operacao,
             "namespace": f"{settings.DATABASE_NAME}.{settings.COLLECTION_NAME}",
